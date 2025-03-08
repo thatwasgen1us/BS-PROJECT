@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+@layer utilities {
+  .bg-background {
+    background-color: var(--background);
+  }
+  .text-text {
+    color: var(--text);
+  }
+  .bg-secondary {
+    background-color: var(--secondary);
+  }
+  .text-link {
+    color: var(--link);
+  }
+  .bg-accent {
+    background-color: var(--accent);
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --text: #1f2937;
+  --secondary: #f3f4f6;
+  --link: #2563eb;
+  --accent: #3b82f6;
+}
+
+[data-theme="dark"] {
+  --background: #1f2937;
+  --text: #ffffff;
+  --secondary: #374151;
+  --link: #60a5fa;
+  --accent: #1d4ed8;
+}
