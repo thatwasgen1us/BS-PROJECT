@@ -1,6 +1,6 @@
 const BsVoltage = () => {
   return (
-    <div>
+    <div className="h-screen">
       BsVoltage
     </div>
   )

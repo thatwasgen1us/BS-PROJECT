@@ -18,23 +18,32 @@ body {
   .text-link {
     color: var(--link);
   }
-  .bg-accent {
+  .hover\:bg-accent:hover {
     background-color: var(--accent);
   }
 }
 
 :root {
-  --background: #ffffff;
-  --text: #1f2937;
-  --secondary: #f3f4f6;
-  --link: #2563eb;
-  --accent: #3b82f6;
+  --background: #ffffff; 
+  --text: #1e293b; 
+  --secondary: #f1f5f9; 
+  --link: #2563eb; 
+  --accent: #3b82f6; 
 }
 
 [data-theme="dark"] {
-  --background: #1f2937;
-  --text: #ffffff;
-  --secondary: #374151;
-  --link: #60a5fa;
+  --background: #0f172a;
+  --text: #f8fafc; 
+  --secondary: #1e293b; 
+  --link: #60a5fa; 
   --accent: #1d4ed8;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none; 
+  scrollbar-width: none;
 }

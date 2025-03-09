@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom"
 import ToggleTheme from "@/utils/ToggleTheme"
-import { useTheme } from "@/utils/ThemeContext"
 
 const Header = () => {
-  const {theme} = useTheme()
-
-  
   return (
-    <header className="flex justify-center bg-background text-text min-h-15">
-      <div className="container flex justify-between items-center mx-auto">
+    <header className="flex justify-center w-full bg-background text-text min-h-15">
+      <div className="flex justify-between items-center px-8 py-2 mx-auto w-full">
         <div className="flex gap-4 text-xl font-bold">
           <div>BS information</div>
           <ToggleTheme/>

@@ -9,12 +9,13 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="mx-auto">
+      <div className="overflow-hidden mx-auto h-screen bg-secondary">
         <BrowserRouter>
           <Header />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/bs-voltage" element={<BsVoltage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/base/:stationId" element={<Home />} />
+          <Route path="/bs-voltage" element={<BsVoltage />} />
           </Routes>
       </BrowserRouter>
       </div>
