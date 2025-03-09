@@ -7,46 +7,58 @@ const Schedule = () => {
 
   const hasData = Array.isArray(dataObj) && dataObj.length > 0;
 
-  const limitedData = useMemo(() => (hasData ? dataObj.slice(0, 52) : []), [dataObj, hasData]);
+  const limitedData = useMemo(
+    () => (hasData ? dataObj.slice(0, 52) : []),
+    [dataObj, hasData]
+  );
 
-
-  const rowsData = useMemo(() => 
-    limitedData.map((item) => ({
-      ...item,
-      CA_2G: Number(item.CA_2G),
-    })), 
+  const rowsData = useMemo(
+    () =>
+      limitedData.map((item) => ({
+        ...item,
+        CA_2G: Number(item.CA_2G),
+      })),
     [limitedData]
   );
 
-  const rows = useMemo(() => 
-    Array.from({ length: Math.ceil(rowsData.length / 13) }, (_, i) =>
-      rowsData.slice(i * 13, i * 13 + 13)
-    ), 
+  const rows = useMemo(
+    () =>
+      Array.from({ length: Math.ceil(rowsData.length / 13) }, (_, i) =>
+        rowsData.slice(i * 13, i * 13 + 13)
+      ),
     [rowsData]
   );
 
-  const [tooltip, setTooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    content: "",
+    x: 0,
+    y: 0,
+  });
   const [, setHoveredKey] = useState<string | null>(null);
 
   const getColor = useCallback((value: number): string => {
-    if (value === 100) return '#43a047';
-    if (value >= 99.8) return 'orange';
-    if (value === 0) return 'gray';
-    return '#d32f2f';
+    if (value === 100) return "#43a047";
+    if (value >= 99.8) return "orange";
+    if (value === 0) return "gray";
+    return "#d32f2f";
   }, []);
 
-  const handleMouseEnter = useCallback((item: week & { CA_2G: string | number }, event: React.MouseEvent) => {
-    setTooltip({
-      visible: true,
-      content: `${item.weak}: ${item.CA_2G}%`,
-      x: event.clientX,
-      y: event.clientY,
-    });
-    setHoveredKey(item.weak);
-  }, []);
+  const handleMouseEnter = useCallback(
+    (item: week & { CA_2G: string | number }, event: React.MouseEvent) => {
+      setTooltip({
+        visible: true,
+        content: `${item.weak}: ${item.CA_2G}%`,
+        x: event.clientX,
+        y: event.clientY,
+      });
+      setHoveredKey(item.weak);
+    },
+    []
+  );
 
   const handleMouseLeave = useCallback(() => {
-    setTooltip({ visible: false, content: '', x: 0, y: 0 });
+    setTooltip({ visible: false, content: "", x: 0, y: 0 });
     setHoveredKey(null);
   }, []);
 
@@ -57,7 +69,9 @@ const Schedule = () => {
           rows.map((row, rowIndex) => (
             <div key={rowIndex} className="flex row">
               {row.map((item) => {
-                const weakValue = item.weak ? Number(item.weak.slice(-2)) : null;
+                const weakValue = item.weak
+                  ? Number(item.weak.slice(-2))
+                  : null;
                 return (
                   <div
                     key={item.weak}

@@ -1,14 +1,13 @@
-import StationList from "@/components/StationList"
-import { useState } from "react"
+import StationList from "@/components/StationList";
+import { useState } from "react";
 
 const Stations = () => {
-  const [searchTerm, setSearchTerm ] = useState<string>('')
-  
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
   return (
     <aside className="min-w-[350px] bg-blue-50 rounded-lg shadow-lg p-4 overflow-y-scroll mb-12 scrollbar-none">
       <div>
-        
-      {/* Поле ввода */}
+        {/* Поле ввода */}
         <div className="mb-6">
           <input
             type="text"
@@ -19,7 +18,7 @@ const Stations = () => {
           />
         </div>
       </div>
-      
+
       {/* Заголовки */}
       <div className="mb-4">
         <div className="flex justify-between items-center px-4 text-lg font-semibold text-gray-700">
@@ -28,9 +27,9 @@ const Stations = () => {
           <div>Year</div>
         </div>
       </div>
-      <StationList searchTerm={searchTerm}/>
+      <StationList searchTerm={searchTerm} />
     </aside>
-  )
-}
+  );
+};
 
-export {Stations}
+export { Stations };

@@ -6,7 +6,6 @@ const Information = () => {
 
   return (
     <div className="flex-1 min-w-[350px] bg-blue-50 rounded-lg shadow-lg p-6 w-full overflow-y-auto h-full scrollbar-none">
-
       {/* Заголовок */}
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">

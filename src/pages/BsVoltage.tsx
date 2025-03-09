@@ -1,9 +1,5 @@
 const BsVoltage = () => {
-  return (
-    <div className="h-screen">
-      BsVoltage
-    </div>
-  )
-}
+  return <div className="h-screen">BsVoltage</div>;
+};
 
-export default BsVoltage
+export default BsVoltage;

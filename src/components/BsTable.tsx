@@ -2,23 +2,24 @@ import { baseStation } from "../mock";
 import { week } from "../mock";
 
 const BsTable = () => {
-  const data = baseStation
+  const data = baseStation;
   return (
-      <div className="overflow-x-auto my-12 mt-6 rounded-lg shadow-md">
-        <div className="min-w-[800px] text-center">
-          {/* Заголовки таблицы */}
-          <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text">
-            <div className="font-semibold">Неделя</div>
-            <div className="font-semibold">Change of Battery</div>
-            <div className="font-semibold">Count of Alarms</div>
-            <div className="font-semibold">Time of Alarms</div>
-            <div className="font-semibold">Cell Availability</div>
-            <div className="font-semibold">Combine</div>
-          </div>
-  
-          {/* Данные таблицы */}
-          <div className="text-center bg-white divide-y divide-gray-200">
-            {data?.map((week: week, index: number) => (
+    <div className="overflow-x-auto my-12 mt-6 rounded-lg shadow-md">
+      <div className="min-w-[800px] text-center">
+        {/* Заголовки таблицы */}
+        <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text">
+          <div className="font-semibold">Неделя</div>
+          <div className="font-semibold">Change of Battery</div>
+          <div className="font-semibold">Count of Alarms</div>
+          <div className="font-semibold">Time of Alarms</div>
+          <div className="font-semibold">Cell Availability</div>
+          <div className="font-semibold">Combine</div>
+        </div>
+
+        {/* Данные таблицы */}
+        <div className="text-center bg-white divide-y divide-gray-200">
+          {data?.map(
+            (week: week, index: number) =>
               Number(week.CA_2G) < 100 &&
               week.CA_2G !== "" && (
                 <div
@@ -47,11 +48,11 @@ const BsTable = () => {
                   />
                 </div>
               )
-            ))}
-          </div>
+          )}
         </div>
       </div>
+    </div>
   );
-}
+};
 
-export { BsTable }
+export { BsTable };
