@@ -24,21 +24,20 @@ body {
 }
 
 :root {
-  --background: #ffffff; 
-  --text: #1e293b; 
-  --secondary: #f1f5f9; 
-  --link: #2563eb; 
-  --accent: #3b82f6; 
+  --background: #f8fafc; 
+  --text: #1e293b;
+  --secondary: #e2e8f0; 
+  --link: #2563eb;
+  --accent: #3b82f6;
 }
 
 [data-theme="dark"] {
-  --background: #0f172a;
+  --background: #0f172a; 
   --text: #f8fafc; 
   --secondary: #1e293b; 
-  --link: #60a5fa; 
-  --accent: #1d4ed8;
+  --link: #60a5fa;
+  --accent: #1d4ed8; 
 }
-
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }

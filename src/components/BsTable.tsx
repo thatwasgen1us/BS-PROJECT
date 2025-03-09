@@ -5,9 +5,9 @@ const BsTable = () => {
   const data = baseStation
   return (
       <div className="overflow-x-auto my-12 mt-6 rounded-lg shadow-md">
-        <div className="min-w-[800px] ">
+        <div className="min-w-[800px] text-center">
           {/* Заголовки таблицы */}
-          <div className="grid grid-cols-6 gap-4 p-3 rounded-t-lg bg-background text-text">
+          <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text">
             <div className="font-semibold">Неделя</div>
             <div className="font-semibold">Change of Battery</div>
             <div className="font-semibold">Count of Alarms</div>
@@ -17,13 +17,13 @@ const BsTable = () => {
           </div>
   
           {/* Данные таблицы */}
-          <div className="bg-white divide-y divide-gray-200">
+          <div className="text-center bg-white divide-y divide-gray-200">
             {data?.map((week: week, index: number) => (
               Number(week.CA_2G) < 100 &&
               week.CA_2G !== "" && (
                 <div
                   key={week.weak || index}
-                  className="grid grid-cols-6 gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"
+                  className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"
                 >
                   <div className="text-gray-800">{week.weak}</div>
                   <div className="text-gray-800">{week.change_of_battery}</div>
@@ -38,7 +38,7 @@ const BsTable = () => {
                   </div>
                   <div className="text-gray-800">{week.CA_2G} %</div>
                   <div
-                    className="text-gray-800"
+                    className="ml-4 text-left text-gray-800"
                     dangerouslySetInnerHTML={{
                       __html: week.combined_text
                         ? week.combined_text.replace(/\/n/g, "<br />")
