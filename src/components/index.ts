@@ -4,3 +4,4 @@ export { Stations } from "@/components/Stations";
 export { Information } from "@/components/Information";
 export { Schedule } from "@/components/Schedule";
 export { BsTable } from "@/components/BsTable";
+export {ToggleTheme} from "@/components/ToggleTheme"

@@ -1,5 +1,5 @@
+import {ToggleTheme} from "@/components/ToggleTheme";
 import { Link } from "react-router-dom";
-import ToggleTheme from "@/utils/ToggleTheme";
 
 const Header = () => {
   return (

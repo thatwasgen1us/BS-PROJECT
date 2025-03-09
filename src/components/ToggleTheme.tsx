@@ -1,4 +1,4 @@
-import { useTheme } from "./ThemeContext";
+import { useTheme } from "@/utils/ThemeContext";
 
 const ToggleTheme = () => {
   const { theme, toggleTheme } = useTheme();
@@ -34,4 +34,4 @@ const ToggleTheme = () => {
   );
 };
 
-export default ToggleTheme;
+export {ToggleTheme};
