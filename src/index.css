@@ -20,6 +20,10 @@ body {
   .hover\:bg-accent:hover {
     background-color: var(--accent);
   }
+
+  .bg-accent {
+    background-color: var(--accent);
+  }
 }
 
 :root {
