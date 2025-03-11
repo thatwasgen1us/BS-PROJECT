@@ -1,9 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
-import { baseStation } from "../mock";
-import { week } from "../mock";
+import { SiteInfo, WeekData } from "@/api/api";
 
-const Schedule = () => {
-  const dataObj = baseStation;
+interface ScheduleProps {
+  data: SiteInfo | null | undefined;
+}
+
+const Schedule: React.FC<ScheduleProps> = ({ data }) => {
+  const dataObj = data?.site_info;
 
   const hasData = Array.isArray(dataObj) && dataObj.length > 0;
 
@@ -45,7 +48,7 @@ const Schedule = () => {
   }, []);
 
   const handleMouseEnter = useCallback(
-    (item: week & { CA_2G: string | number }, event: React.MouseEvent) => {
+    (item: WeekData & { CA_2G: string | number }, event: React.MouseEvent) => {
       setTooltip({
         visible: true,
         content: `${item.weak}: ${item.CA_2G}%`,
@@ -75,7 +78,7 @@ const Schedule = () => {
                 return (
                   <div
                     key={item.weak}
-                    className="flex justify-center items-center p-2 w-8 h-8 rounded border border-gray-300 cursor-default hover:scale-105"
+                    className="flex items-center justify-center w-8 h-8 p-2 border border-gray-300 rounded cursor-default hover:scale-105"
                     style={{ backgroundColor: getColor(item.CA_2G) }}
                     onMouseEnter={(e) => handleMouseEnter(item, e)}
                     onMouseLeave={handleMouseLeave}
@@ -95,7 +98,7 @@ const Schedule = () => {
 
       {tooltip.visible && (
         <div
-          className="fixed z-50 p-2 bg-white rounded border border-black shadow-lg tooltip"
+          className="fixed z-50 p-2 bg-white border border-black rounded shadow-lg tooltip"
           style={{
             left: `${tooltip.x + 10}px`,
             top: `${tooltip.y + 10}px`,

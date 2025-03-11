@@ -1,4 +1,4 @@
-import {ToggleTheme} from "@/components/ToggleTheme";
+import { ToggleTheme } from "@/components/ToggleTheme";
 import { Link } from "react-router-dom";
 
 const Header = () => {

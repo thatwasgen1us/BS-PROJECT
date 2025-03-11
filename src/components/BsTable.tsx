@@ -1,10 +1,14 @@
-import { baseStation } from "../mock";
+import { SiteInfo } from "@/api/api";
 import { week } from "../mock";
 
-const BsTable = () => {
-  const data = baseStation;
+interface Props {
+  dataInfo: SiteInfo | null | undefined;
+}
+
+const BsTable: React.FC<Props> = ({ dataInfo }) => {
+  const data = dataInfo?.site_info;
   return (
-    <div className="overflow-x-auto my-12 mt-6 rounded-lg shadow-md">
+    <div className="my-12 mt-6 overflow-x-auto rounded-lg shadow-md">
       <div className="min-w-[800px] text-center">
         {/* Заголовки таблицы */}
         <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text">

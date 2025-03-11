@@ -34,4 +34,4 @@ const ToggleTheme = () => {
   );
 };
 
-export {ToggleTheme};
+export { ToggleTheme };

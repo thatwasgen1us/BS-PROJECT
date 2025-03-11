@@ -1,25 +1,46 @@
 import { useParams } from "react-router-dom";
-import { Schedule, BsTable } from "@/components";
+import { Schedule, BsTable, Error, Spinner } from "@/components";
+import { SiteInfo, useGetBaseInfoQuery } from "@/api/api";
+import React from "react";
 
-const Information = () => {
+interface InformationProps {
+  onBaseInfoUpdate: (data: SiteInfo) => void;
+}
+
+const Information: React.FC<InformationProps> = ({onBaseInfoUpdate }) => {
   const { stationId } = useParams();
+  const { data, isLoading, error } = useGetBaseInfoQuery(stationId ?? "NS1120");
+
+  React.useEffect(() => {
+    if (data) {
+      onBaseInfoUpdate(data); 
+    }
+  }, [data, onBaseInfoUpdate]);
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return <Error />;
+  }
 
   return (
     <div className="flex-1 min-w-[350px] bg-blue-50 rounded-lg shadow-lg p-6 w-full overflow-y-auto h-full scrollbar-none">
       {/* Заголовок */}
-      <div className="flex justify-center items-center mb-6">
+      <div className="flex items-center justify-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">
-          {stationId || "Выберите базовую станцию"}
+          {stationId || "NS1120"}
         </h1>
       </div>
 
       {/* Основной контент */}
-      <div className="flex gap-6 justify-between">
+      <div className="flex justify-between gap-6">
         {/* Блок с информацией */}
-        <div className="overflow-hidden flex-1 p-4 bg-white rounded-lg shadow-md bg-background text-text">
+        <div className="flex-1 p-4 overflow-hidden bg-white rounded-lg shadow-md bg-background text-text">
           <h2 className="mb-4 text-xl font-semibold">Информация</h2>
           <div className="space-y-3 break-words">
-            <p>Название: {stationId}</p>
+            <p>Название: {stationId || "NS1120"}</p>
             <p>Месяц: 99.5%</p>
             <p>Год: 98.9%</p>
             <p>Статус: Активна</p>
@@ -27,14 +48,14 @@ const Information = () => {
         </div>
 
         {/* График */}
-        <div className="flex flex-1 justify-center items-center p-4 rounded-lg shadow-md bg-background">
-          <Schedule />
+        <div className="flex items-center justify-center flex-1 p-4 rounded-lg shadow-md bg-background">
+          <Schedule data={data} />
         </div>
       </div>
 
       {/* Таблица */}
       <div className="mt-6">
-        <BsTable />
+        <BsTable dataInfo={data} />
       </div>
     </div>
   );
