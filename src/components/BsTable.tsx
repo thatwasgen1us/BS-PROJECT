@@ -21,10 +21,18 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
 
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200">
-          {data?.map(
-            (week: WeekData, index: number) =>
-              Number(week.CA_2G) < 100 || Number(week.count_of_alarms) > 0 &&
-              week.CA_2G !== ""  &&  (
+          {data?.map((week: WeekData, index: number) => {
+            const isCA2GLessThan100 = Number(week.CA_2G) < 100;
+            const isCountOfAlarmsGreaterThan0 =
+              Number(week.count_of_alarms) > 0;
+            const isCA2GNotEmpty = week.CA_2G !== "";
+
+            // Проверка условий
+            if (
+              (isCA2GLessThan100 || isCountOfAlarmsGreaterThan0) &&
+              isCA2GNotEmpty
+            ) {
+              return (
                 <div
                   key={week.weak || index}
                   className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"
@@ -50,8 +58,10 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
                     }}
                   />
                 </div>
-              )
-          )}
+              );
+            }
+            return null; // Возвращаем null, если условия не выполнены
+          })}
         </div>
       </div>
     </div>
