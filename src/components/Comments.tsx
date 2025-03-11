@@ -3,7 +3,7 @@ import { Comment, SiteInfo, useAddCommentMutation } from "@/api/api";
 import { useParams } from "react-router-dom";
 
 interface Props {
-  data: SiteInfo | null | undefined;
+  data?: SiteInfo | null | undefined;
 }
 
 const Comments: React.FC<Props> = ({ data }) => {
