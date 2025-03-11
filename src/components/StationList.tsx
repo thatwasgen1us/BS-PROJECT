@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useGetBaseDataQuery } from "@/api/api";
 import { Error, Spinner } from "@/components";
 
@@ -7,6 +7,7 @@ type Props = {
 };
 
 const StationList: React.FC<Props> = ({ searchTerm }) => {
+  const { stationId } = useParams()
   const { data, isLoading, error } = useGetBaseDataQuery();
   const uniqueStationNames = new Set();
 
@@ -34,10 +35,11 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
       {filteredStations.length > 0 ? (
         filteredStations.map((station, index) => (
           <Link
-            to={`/base/${station.BS_NAME}`}
-            key={station.BS_NAME + index}
-            className="flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-background hover:shadow-md hover:bg-accent"
-          >
+              to={`/base/${station.BS_NAME}`}
+              key={station.BS_NAME + index}
+              className={station.BS_NAME === stationId ? "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-accent hover:shadow-md" : "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-background hover:shadow-md hover:bg-accent"}
+
+            >
             <div className="text-lg font-semibold text-text">
               {station.BS_NAME}
             </div>

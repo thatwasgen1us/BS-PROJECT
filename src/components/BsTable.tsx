@@ -1,5 +1,4 @@
-import { SiteInfo } from "@/api/api";
-import { week } from "../mock";
+import { SiteInfo, WeekData } from "@/api/api";
 
 interface Props {
   dataInfo: SiteInfo | null | undefined;
@@ -23,7 +22,7 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200">
           {data?.map(
-            (week: week, index: number) =>
+            (week: WeekData, index: number) =>
               Number(week.CA_2G) < 100 &&
               week.CA_2G !== "" && (
                 <div
