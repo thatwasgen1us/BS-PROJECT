@@ -5,10 +5,10 @@ import { SiteInfo } from "../api/api";
 
 const Home = () => {
   const { stationId } = useParams();
-  const [baseInfo, setBaseInfo] = useState<SiteInfo | null>(null); // Состояние для хранения данных
+  const [baseInfo, setBaseInfo] = useState<SiteInfo | null>(null);
 
   const handleBaseInfoUpdate = (data: SiteInfo) => {
-    setBaseInfo(data); // Обновляем состояние с полученными данными
+    setBaseInfo(data); 
   };
 
   return (
@@ -16,8 +16,8 @@ const Home = () => {
       {stationId ? (
         <>
           <Stations />
-          <Information onBaseInfoUpdate={handleBaseInfoUpdate}/>
-          <Comments data={baseInfo}/>
+          <Information onBaseInfoUpdate={handleBaseInfoUpdate} />
+          <Comments data={baseInfo} />
         </>
       ) : (
         <>
@@ -25,7 +25,7 @@ const Home = () => {
           <h1 className="text-2xl font-semibold text-text">
             Выберите базовую станцию
           </h1>
-          <Comments data={baseInfo}/>
+          <Comments />
         </>
       )}
     </div>
