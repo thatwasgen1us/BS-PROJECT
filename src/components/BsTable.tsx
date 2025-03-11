@@ -10,13 +10,13 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
     <div className="my-12 mt-6 overflow-x-auto rounded-lg shadow-md">
       <div className="min-w-[800px] text-center">
         {/* Заголовки таблицы */}
-        <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text">
+        <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text items-center">
           <div className="font-semibold">Неделя</div>
-          <div className="font-semibold">Change of Battery</div>
-          <div className="font-semibold">Count of Alarms</div>
-          <div className="font-semibold">Time of Alarms</div>
-          <div className="font-semibold">Cell Availability</div>
-          <div className="font-semibold">Combine</div>
+          <div className="font-semibold">Время работы АКБ</div>
+          <div className="font-semibold">Кол-во отключений</div>
+          <div className="font-semibold">Время отключения</div>
+          <div className="font-semibold">Процент в работе</div>
+          <div className="font-semibold">Заявки</div>
         </div>
 
         {/* Данные таблицы */}
@@ -27,7 +27,6 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
               Number(week.count_of_alarms) > 0;
             const isCA2GNotEmpty = week.CA_2G !== "";
 
-            // Проверка условий
             if (
               (isCA2GLessThan100 || isCountOfAlarmsGreaterThan0) &&
               isCA2GNotEmpty
@@ -60,7 +59,7 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
                 </div>
               );
             }
-            return null; // Возвращаем null, если условия не выполнены
+            return null;
           })}
         </div>
       </div>
