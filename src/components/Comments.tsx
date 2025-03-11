@@ -58,12 +58,12 @@ const Comments: React.FC<Props> = ({ data }) => {
         {comments.map((comment, index) => (
           <div
             key={index}
-            className="p-3 overflow-hidden break-words bg-white rounded-lg shadow-sm"
+            className="p-3 overflow-hidden break-words rounded-lg shadow-sm bg-background text-text"
           >
-            <p className="text-gray-700">{comment.comment}</p>
-            <p className="text-sm text-gray-500">{comment.date}</p>
-            <p className="text-xs text-gray-500">{comment.type_failure}</p>
-            <p className="text-xs text-gray-500">{comment.status}</p>
+            <p className="text-text">{comment.comment}</p>
+            <p className="text-sm text-text">{comment.date}</p>
+            <p className="text-xs text-text">{comment.type_failure}</p>
+            <p className="text-xs text-text">{comment.status}</p>
           </div>
         ))}
       </div>
