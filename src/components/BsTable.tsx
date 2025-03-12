@@ -5,6 +5,8 @@ interface Props {
 }
 
 const BsTable: React.FC<Props> = ({ dataInfo }) => {
+  const hashValue = window.location.hash.substring(1).toLowerCase();
+
   const data = dataInfo?.site_info;
   return (
     <div className="my-12 mt-6 overflow-x-auto rounded-lg shadow-md">
@@ -35,14 +37,14 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
               return (
                 <div
                   key={week.weak || index}
-                  className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"
+                  className={hashValue === week.weak.toLowerCase() ? "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 bg-blue-500" : "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"}
                 >
-                  <div className="text-gray-800">{week.weak}</div>
+                  <div className="text-gray-800" id={week.weak}>{week.weak}</div>
                   <div className="text-gray-800">{week.change_of_battery}</div>
                   <div className="text-gray-800">{week.count_of_alarms}</div>
                   <div className="text-gray-800">
                     {typeof week.time_of_alarms === "string" &&
-                    week.time_of_alarms.length > 0
+                      week.time_of_alarms.length > 0
                       ? week.time_of_alarms.includes("1900")
                         ? week.time_of_alarms.split("T")[1]?.split(".")[0]
                         : week.time_of_alarms.split(".")[0]
