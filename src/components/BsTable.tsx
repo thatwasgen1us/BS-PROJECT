@@ -22,13 +22,14 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200">
           {data?.map((week: WeekData, index: number) => {
+            const isHasText = week.combined_text !== null && week.combined_text.length > 1;
             const isCA2GLessThan100 = Number(week.CA_2G) < 100;
             const isCountOfAlarmsGreaterThan0 =
               Number(week.count_of_alarms) > 0;
             const isCA2GNotEmpty = week.CA_2G !== "";
 
             if (
-              (isCA2GLessThan100 || isCountOfAlarmsGreaterThan0) &&
+              (isCA2GLessThan100 || isCountOfAlarmsGreaterThan0 || isHasText) &&
               isCA2GNotEmpty
             ) {
               return (
