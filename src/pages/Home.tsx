@@ -12,7 +12,7 @@ const Home = () => {
   };
 
   return (
-    <div className="flex justify-between gap-2 p-2 mx-auto h-dvh">
+    <div className="flex justify-between gap-2 p-2 pt-16 mx-auto h-dvh">
       {stationId ? (
         <>
           <Stations />
