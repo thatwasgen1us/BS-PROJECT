@@ -49,7 +49,7 @@ const Comments: React.FC<Props> = ({ data }) => {
   };
 
   return (
-    <div className="min-w-[350px] max-w-[355px] bg-blue-50 rounded-lg shadow-lg p-4 flex flex-col max-h-screen">
+    <div className="min-w-[350px] max-w-[355px] bg-blue-50 rounded-lg shadow-lg p-4 flex flex-col max-h-screen pb-12">
       <h2 className="mb-4 text-xl font-semibold text-gray-800">Комментарии</h2>
 
       {/* Список комментариев */}
