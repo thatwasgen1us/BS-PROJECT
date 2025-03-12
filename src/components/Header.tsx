@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <header className="flex justify-center w-full bg-background text-text min-h-15">
+    <header className="flex justify-center w-full header bg-background text-text min-h-15">
       <div className="flex items-center justify-between w-full px-8 py-2 mx-auto">
         <div className="flex gap-4 text-xl font-bold">
           <div>Информация по БС</div>
