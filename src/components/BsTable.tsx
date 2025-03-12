@@ -37,12 +37,12 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
               return (
                 <div
                   key={week.weak || index}
-                  className={hashValue === week.weak.toLowerCase() ? "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 bg-blue-500" : "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 hover:bg-gray-50"}
+                  className={hashValue === week.weak.toLowerCase() ? "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 bg-blue-500 text-white" : "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 text-gray-800 hover:bg-gray-50"}
                 >
-                  <div className="text-gray-800" id={week.weak}>{week.weak}</div>
-                  <div className="text-gray-800">{week.change_of_battery}</div>
-                  <div className="text-gray-800">{week.count_of_alarms}</div>
-                  <div className="text-gray-800">
+                  <div id={week.weak}>{week.weak}</div>
+                  <div>{week.change_of_battery}</div>
+                  <div>{week.count_of_alarms}</div>
+                  <div>
                     {typeof week.time_of_alarms === "string" &&
                       week.time_of_alarms.length > 0
                       ? week.time_of_alarms.includes("1900")
@@ -50,9 +50,9 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
                         : week.time_of_alarms.split(".")[0]
                       : ""}
                   </div>
-                  <div className="text-gray-800">{week.CA_2G} %</div>
+                  <div>{week.CA_2G} %</div>
                   <div
-                    className="ml-4 text-left text-gray-800"
+                    className="ml-4 text-left"
                     dangerouslySetInnerHTML={{
                       __html: week.combined_text
                         ? week.combined_text.replace(/\/n/g, "<br />")
