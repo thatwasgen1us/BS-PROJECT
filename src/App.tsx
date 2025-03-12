@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/utils/ThemeContext";
 function App() {
   return (
     <ThemeProvider>
-      <div className="overflow-hidden mx-auto h-screen bg-secondary">
+      <div className="h-screen mx-auto overflow-hidden bg-secondary">
         <BrowserRouter>
           <Header />
           <Routes>
