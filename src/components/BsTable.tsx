@@ -9,7 +9,7 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
 
   const data = dataInfo?.site_info;
   return (
-    <div className="my-12 mt-6 overflow-x-auto rounded-lg shadow-md">
+    <div className="mt-6 overflow-x-auto rounded-lg shadow-md">
       <div className="min-w-[800px] text-center">
         {/* Заголовки таблицы */}
         <div className="grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 rounded-t-lg bg-background text-text items-center">
