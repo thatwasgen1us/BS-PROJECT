@@ -65,6 +65,19 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
     setHoveredKey(null);
   }, []);
 
+  const handleAnchorClick = useCallback((event: React.MouseEvent, item: WeekData & { CA_2G: string | number }) => {
+    event.preventDefault(); 
+    setTimeout(() => {
+      const element = document.getElementById(item.weak);
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  }, []);
+
   return (
     <div className="table-container">
       <div className="table">
@@ -76,7 +89,8 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                   ? Number(item.weak.slice(-2))
                   : null;
                 return (
-                  <a href={`#${item.weak}`}
+                  <div
+                    onClick={(e) => handleAnchorClick(e, item)}
                     key={item.weak}
                     className="flex items-center justify-center w-8 h-8 p-2 duration-75 border border-gray-300 rounded cursor-default du hover:scale-105"
                     style={{ backgroundColor: getColor(item.CA_2G) }}
@@ -86,7 +100,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                     {weakValue !== null && weakValue > 17 && weakValue < 43 && (
                       <span>☀</span>
                     )}
-                  </a>
+                  </div>
                 );
               })}
             </div>
