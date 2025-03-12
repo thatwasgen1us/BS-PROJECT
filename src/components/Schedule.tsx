@@ -76,9 +76,9 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                   ? Number(item.weak.slice(-2))
                   : null;
                 return (
-                  <div
+                  <a href={`#${item.weak}`}
                     key={item.weak}
-                    className="flex items-center justify-center w-8 h-8 p-2 border border-gray-300 rounded cursor-default hover:scale-105"
+                    className="flex items-center justify-center w-8 h-8 p-2 duration-75 border border-gray-300 rounded cursor-default du hover:scale-105"
                     style={{ backgroundColor: getColor(item.CA_2G) }}
                     onMouseEnter={(e) => handleMouseEnter(item, e)}
                     onMouseLeave={handleMouseLeave}
@@ -86,7 +86,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                     {weakValue !== null && weakValue > 17 && weakValue < 43 && (
                       <span>☀</span>
                     )}
-                  </div>
+                  </a>
                 );
               })}
             </div>
