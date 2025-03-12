@@ -49,7 +49,7 @@ const Comments: React.FC<Props> = ({ data }) => {
   };
 
   return (
-    <div className='pt-15'>
+    
       <div className="min-w-[350px] max-w-[355px] bg-blue-50 rounded-lg shadow-lg p-4 flex flex-col pb-12 h-full ">
         <h2 className="mb-4 text-xl font-semibold text-gray-800">Комментарии</h2>
   
@@ -112,7 +112,7 @@ const Comments: React.FC<Props> = ({ data }) => {
           </button>
         </div>
       </div>
-    </div>
+
   );
 };
 
