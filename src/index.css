@@ -26,6 +26,7 @@ body {
   }
 }
 
+
 :root {
   --background: #f8fafc;
   --text: #1e293b;
@@ -48,4 +49,12 @@ body {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+header {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  z-index: 1000; 
 }
