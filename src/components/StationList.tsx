@@ -26,7 +26,6 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
       })
     : [];
 
-  // Функция сортировки
   const sortedStations = filteredStations.sort((a, b) => {
     let comparison = 0;
 
@@ -35,16 +34,16 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
         comparison = a.BS_NAME.localeCompare(b.BS_NAME);
         break;
       case 'month':
-        comparison = b.CA_4w - a.CA_4w; // Предполагается, что month - это числовое значение
+        comparison = b.CA_4w - a.CA_4w; 
         break;
       case 'year':
-        comparison = b.CA_52w - a.CA_52w; // Предполагается, что year - это числовое значение
+        comparison = b.CA_52w - a.CA_52w; 
         break;
       default:
         return 0;
     }
 
-    return sortOrder === 'asc' ? comparison : -comparison; // Меняем порядок сортировки
+    return sortOrder === 'asc' ? comparison : -comparison; 
   });
 
   if (isLoading) {
@@ -62,19 +61,19 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
         <div className="flex items-center justify-between px-4 text-lg font-semibold text-gray-700">
           <button onClick={() => {
             setSortCriteria('name');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); // Переключаем порядок сортировки
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
           }}>
             База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
           <button onClick={() => {
             setSortCriteria('month');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); // Переключаем порядок сортировки
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
           }}>
             Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
           <button onClick={() => {
             setSortCriteria('year');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); // Переключаем порядок сортировки
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
           }}>
             Год {sortCriteria === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
