@@ -6,7 +6,7 @@ const Header = () => {
     <header className="flex justify-center w-full header bg-background text-text min-h-15">
       <div className="flex items-center justify-between w-full px-8 py-2 mx-auto">
         <div className="flex gap-4 text-xl font-bold">
-          <div>Информация по БС</div>
+          <Link to={'/'}>Информация по БС</Link>
           <ToggleTheme />
         </div>
         <nav className="flex space-x-4">
