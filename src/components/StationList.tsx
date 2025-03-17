@@ -12,8 +12,8 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
   const { data, isLoading, error } = useGetBaseDataQuery();
   const uniqueStationNames = new Set();
 
-  const [sortCriteria, setSortCriteria] = useState<'name' | 'month' | 'year'>('name'); // Состояние для хранения критерия сортировки
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); // Состояние для хранения порядка сортировки
+  const [sortCriteria, setSortCriteria] = useState<'name' | 'month' | 'year'>('name'); 
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); 
 
   const filteredStations = data
     ? data.data.filter((station) => {
@@ -58,20 +58,26 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     <div className="space-y-2">
       {/* Элементы управления для сортировки */}
       <div className="mb-4">
-        <div className="flex items-center justify-between px-4 text-lg font-semibold text-gray-700">
-          <button onClick={() => {
+        <div className="flex justify-between">
+          <button
+            className="cursor-pointer"
+            onClick={() => {
             setSortCriteria('name');
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
           }}>
             База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
-          <button onClick={() => {
+          <button
+            className="cursor-pointer"
+            onClick={() => {
             setSortCriteria('month');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
           }}>
             Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
-          <button onClick={() => {
+          <button
+            className="cursor-pointer" 
+            onClick={() => {
             setSortCriteria('year');
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
           }}>
