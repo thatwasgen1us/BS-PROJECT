@@ -2,14 +2,13 @@ import { FormEvent, useEffect, useState } from "react";
 import { useLazyGetBaseVoltageQuery } from "../api/api";
 
 interface BaseStation {
-  id: number;
-  name: string;
+  name: string; // Уникальный идентификатор
   power: string;
   voltage: number;
   duration: string;
   estimatedTime: string;
   status: string;
-  lastUpdated: string; 
+  lastUpdated: string;
 }
 
 const BsVoltage = () => {
@@ -20,7 +19,8 @@ const BsVoltage = () => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [refreshInterval, setRefreshInterval] = useState<number>(0);
-  const [refreshEnabled, setRefreshEnabled] = useState<boolean>(false); 
+  const [refreshEnabled, setRefreshEnabled] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
@@ -30,6 +30,7 @@ const BsVoltage = () => {
 
   const refreshData = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
     try {
       const updatedBssList = await Promise.all(
         bssList.map(async (bs) => {
@@ -37,7 +38,7 @@ const BsVoltage = () => {
           if (response.data) {
             return {
               ...bs,
-              voltage: response.data[bs.name], 
+              voltage: response.data[bs.name],
               lastUpdated: new Date().toLocaleString(),
             };
           }
@@ -47,7 +48,7 @@ const BsVoltage = () => {
       setBssList(updatedBssList);
     } catch (err) {
       console.error("Ошибка при обновлении данных:", err);
-      alert("Произошла ошибка при обновлении данных.");
+      setErrorMessage("Произошла ошибка при обновлении данных.");
     } finally {
       setIsLoading(false);
     }
@@ -69,25 +70,24 @@ const BsVoltage = () => {
 
     const isValidBsName = /^NS\d{4}$/.test(newBsName);
     if (!isValidBsName) {
-      alert(
-        "Имя БС должно состоять из 6 символов: 'NS' и 4 цифры (например, NS1234)."
-      );
+      setErrorMessage("Имя БС должно состоять из 6 символов: 'NS' и 4 цифры (например, NS1234).");
       return;
     }
 
     const exists = bssList.some((bs) => bs.name === newBsName);
     if (exists) {
-      alert("БС с таким номером уже существует!");
+      setErrorMessage("БС с таким номером уже существует!");
       return;
     }
 
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const response = await trigger(newBsName);
 
       if (response.error) {
-        alert("Ошибка при получении данных: ");
+        setErrorMessage("Ошибка при получении данных.");
         return;
       }
 
@@ -95,14 +95,13 @@ const BsVoltage = () => {
         const voltageData = response.data[newBsName];
 
         const newBs: BaseStation = {
-          id: bssList.length + 1,
-          name: newBsName,
+          name: newBsName, // Используем имя как уникальный идентификатор
           power: "N/A",
           voltage: voltageData,
           duration: "N/A",
           estimatedTime: "N/A",
           status: "N/A",
-          lastUpdated: new Date().toLocaleString(), 
+          lastUpdated: new Date().toLocaleString(),
         };
 
         setBssList((prev) => [...prev, newBs]);
@@ -110,7 +109,7 @@ const BsVoltage = () => {
       }
     } catch (err) {
       console.error("Ошибка при выполнении запроса:", err);
-      alert("Произошла ошибка при добавлении БС.");
+      setErrorMessage("Произошла ошибка при добавлении БС.");
     } finally {
       setIsLoading(false);
     }
@@ -126,15 +125,15 @@ const BsVoltage = () => {
     setNewBsName(value);
   };
 
-  const handleDeleteBs = (id: number) => {
-    const updatedBssList = bssList.filter((bs) => bs.id !== id);
+  const handleDeleteBs = (name: string) => {
+    const updatedBssList = bssList.filter((bs) => bs.name !== name);
     setBssList(updatedBssList);
   };
 
   const handleRefreshIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = parseInt(e.target.value, 10);
     setRefreshInterval(value);
-    setRefreshEnabled(value > 0); 
+    setRefreshEnabled(value > 0);
   };
 
   return (
@@ -194,6 +193,13 @@ const BsVoltage = () => {
           </div>
         </div>
 
+        {/* Отображение ошибки */}
+        {errorMessage && (
+          <div className="p-2 mb-4 text-center text-red-600 bg-red-100 rounded-md">
+            {errorMessage}
+          </div>
+        )}
+
         {/* Заголовки таблицы */}
         <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
           <div>BSS</div>
@@ -202,7 +208,7 @@ const BsVoltage = () => {
           <div>Duration</div>
           <div>Estimated Time</div>
           <div>Status</div>
-          <div>Last Updated</div> {/* Новая колонка для даты обновления */}
+          <div>Last Updated</div>
           <div>Actions</div>
         </div>
 
@@ -210,7 +216,7 @@ const BsVoltage = () => {
         <div className="text-center bg-white divide-y divide-gray-200 rounded">
           {bssList.map((bs) => (
             <div
-              key={bs.id}
+              key={bs.name} // Используем имя как ключ
               className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
             >
               <div>{bs.name}</div>
@@ -223,10 +229,10 @@ const BsVoltage = () => {
               <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
                 {bs.status}
               </div>
-              <div>{bs.lastUpdated}</div> {/* Отображаем дату обновления */}
+              <div>{bs.lastUpdated}</div>
               <div>
                 <button
-                  onClick={() => handleDeleteBs(bs.id)}
+                  onClick={() => handleDeleteBs(bs.name)} // Удаляем по имени
                   className="text-red-500 hover:text-red-700"
                 >
                   Удалить
