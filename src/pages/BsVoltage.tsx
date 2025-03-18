@@ -2,14 +2,62 @@ import { FormEvent, useEffect, useState } from "react";
 import { useLazyGetBaseVoltageQuery } from "../api/api";
 
 interface BaseStation {
-  name: string; // Уникальный идентификатор
+  name: string;
   power: string;
   voltage: number;
   duration: string;
   estimatedTime: string;
   status: string;
   lastUpdated: string;
+  alarms: Record<string, string | null>;
 }
+
+const formatTimestamp = (timestamp: string): string => {
+  if (!timestamp) return "No data";
+
+  const year = parseInt(timestamp.slice(0, 4)),
+        month = parseInt(timestamp.slice(4, 6)) - 1,
+        day = parseInt(timestamp.slice(6, 8)),
+        hours = parseInt(timestamp.slice(8, 10)),
+        minutes = parseInt(timestamp.slice(10, 12)),
+        seconds = parseInt(timestamp.slice(12, 14)),
+        milliseconds = parseInt(timestamp.slice(15, 18));
+
+  const date = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+
+  return date.toLocaleString("ru-RU", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+const calculateDuration = (timestamp: string): string => {
+  if (!timestamp) return "N/A";
+
+  const year = parseInt(timestamp.slice(0, 4)),
+        month = parseInt(timestamp.slice(4, 6)) - 1,
+        day = parseInt(timestamp.slice(6, 8)),
+        hours = parseInt(timestamp.slice(8, 10)),
+        minutes = parseInt(timestamp.slice(10, 12)),
+        seconds = parseInt(timestamp.slice(12, 14)),
+        milliseconds = parseInt(timestamp.slice(15, 18));
+
+  const alarmDate = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - alarmDate.getTime()) / 1000);
+
+  const hoursDiff = Math.floor(diffInSeconds / 3600);
+  const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
+  const secondsDiff = diffInSeconds % 60;
+
+  return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
+};
+
+const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH", "TEMP_LOW", "SECOFF", "FIRE"];
 
 const BsVoltage = () => {
   const [newBsName, setNewBsName] = useState<string>("NS");
@@ -36,9 +84,12 @@ const BsVoltage = () => {
         bssList.map(async (bs) => {
           const response = await trigger(bs.name);
           if (response.data) {
+            const voltageData = response.data[0]?.voltage?.[bs.name] || 0;
+            const alarms = response.data[1]?.alarms || {};
             return {
               ...bs,
-              voltage: response.data[bs.name],
+              voltage: voltageData,
+              alarms: alarms,
               lastUpdated: new Date().toLocaleString(),
             };
           }
@@ -92,16 +143,18 @@ const BsVoltage = () => {
       }
 
       if (response.data) {
-        const voltageData = response.data[newBsName];
+        const voltageData = response.data[0]?.voltage?.[newBsName] || 0;
+        const alarms = response.data[1]?.alarms || {};
 
         const newBs: BaseStation = {
-          name: newBsName, // Используем имя как уникальный идентификатор
+          name: newBsName,
           power: "N/A",
           voltage: voltageData,
           duration: "N/A",
           estimatedTime: "N/A",
           status: "N/A",
           lastUpdated: new Date().toLocaleString(),
+          alarms: alarms,
         };
 
         setBssList((prev) => [...prev, newBs]);
@@ -201,11 +254,11 @@ const BsVoltage = () => {
         )}
 
         {/* Заголовки таблицы */}
-        <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
+        <div className="grid items-center grid-cols-9 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
           <div>BSS</div>
-          <div>Power</div>
-          <div>Voltage</div>
+          <div>Alarms</div>
           <div>Duration</div>
+          <div>Voltage</div>         
           <div>Estimated Time</div>
           <div>Status</div>
           <div>Last Updated</div>
@@ -214,32 +267,49 @@ const BsVoltage = () => {
 
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200 rounded">
-          {bssList.map((bs) => (
-            <div
-              key={bs.name} // Используем имя как ключ
-              className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
-            >
-              <div>{bs.name}</div>
-              <div>{bs.power}</div>
-              <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
-                {bs.voltage} V
+          {bssList.map((bs) => {
+            const hasPowerAlarm = !!bs.alarms.POWER; 
+            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
+
+            return (
+              <div
+                key={bs.name}
+                className="grid grid-cols-9 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+              >
+                <div>{bs.name}</div>
+                <div>
+                  {ALLOWED_ALARMS.map((alarm) => {
+                    const timestamp = bs.alarms[alarm];
+                    if (timestamp) {
+                      return (
+                        <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
+                          {alarm}: {formatTimestamp(timestamp)}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+                <div>{duration}</div>
+                <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
+                  {bs.voltage} V
+                </div>
+                <div>{bs.estimatedTime}</div>
+                <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
+                  {bs.status}
+                </div>
+                <div>{bs.lastUpdated}</div>
+                <div>
+                  <button
+                    onClick={() => handleDeleteBs(bs.name)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Удалить
+                  </button>
+                </div>
               </div>
-              <div>{bs.duration}</div>
-              <div>{bs.estimatedTime}</div>
-              <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
-                {bs.status}
-              </div>
-              <div>{bs.lastUpdated}</div>
-              <div>
-                <button
-                  onClick={() => handleDeleteBs(bs.name)} // Удаляем по имени
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Удалить
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
