@@ -269,8 +269,6 @@ const BsVoltage = () => {
         <div className="text-center bg-white divide-y divide-gray-200 rounded">
           {bssList.map((bs) => {
             const hasPowerAlarm = !!bs.alarms?.POWER; 
-            const powerStatus = hasPowerAlarm ? "N" : "Y";
-            const powerColor = hasPowerAlarm ? "text-red-500" : "text-green-500"; 
             const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A"; 
 
             return (
