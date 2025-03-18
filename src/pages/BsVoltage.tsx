@@ -57,6 +57,7 @@ const calculateDuration = (timestamp: string): string => {
   return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
 };
 
+// Список разрешённых алармов
 const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH", "TEMP_LOW", "SECOFF", "FIRE"];
 
 const BsVoltage = () => {
@@ -256,20 +257,23 @@ const BsVoltage = () => {
         {/* Заголовки таблицы */}
         <div className="grid items-center grid-cols-9 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
           <div>BSS</div>
-          <div>Alarms</div>
+          <div>Power</div>
+          <div>Voltage</div>
           <div>Duration</div>
-          <div>Voltage</div>         
           <div>Estimated Time</div>
           <div>Status</div>
           <div>Last Updated</div>
+          <div>Alarms</div>
           <div>Actions</div>
         </div>
 
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200 rounded">
           {bssList.map((bs) => {
-            const hasPowerAlarm = !!bs.alarms.POWER; 
-            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
+            const hasPowerAlarm = !!bs.alarms?.POWER; 
+            const powerStatus = hasPowerAlarm ? "N" : "Y";
+            const powerColor = hasPowerAlarm ? "text-red-500" : "text-green-500"; 
+            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A"; 
 
             return (
               <div
@@ -277,9 +281,19 @@ const BsVoltage = () => {
                 className="grid grid-cols-9 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
               >
                 <div>{bs.name}</div>
+                <div className={`text-center ${powerColor}`}>{powerStatus}</div>
+                <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
+                  {bs.voltage} V
+                </div>
+                <div>{duration}</div>
+                <div>{bs.estimatedTime}</div>
+                <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
+                  {bs.status}
+                </div>
+                <div>{bs.lastUpdated}</div>
                 <div>
                   {ALLOWED_ALARMS.map((alarm) => {
-                    const timestamp = bs.alarms[alarm];
+                    const timestamp = bs.alarms?.[alarm]; 
                     if (timestamp) {
                       return (
                         <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
@@ -290,15 +304,6 @@ const BsVoltage = () => {
                     return null;
                   })}
                 </div>
-                <div>{duration}</div>
-                <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
-                  {bs.voltage} V
-                </div>
-                <div>{bs.estimatedTime}</div>
-                <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
-                  {bs.status}
-                </div>
-                <div>{bs.lastUpdated}</div>
                 <div>
                   <button
                     onClick={() => handleDeleteBs(bs.name)}
