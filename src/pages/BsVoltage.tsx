@@ -254,7 +254,7 @@ const BsVoltage = () => {
         )}
 
         {/* Заголовки таблицы */}
-        <div className="grid items-center grid-cols-9 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
+        <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
           <div>BSS</div>
           <div>Alarms</div>
           <div>Duration</div>
@@ -274,7 +274,7 @@ const BsVoltage = () => {
             return (
               <div
                 key={bs.name}
-                className="grid grid-cols-9 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+                className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
               >
                 <div>{bs.name}</div>
                 <div>
