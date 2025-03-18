@@ -182,7 +182,7 @@ const BsVoltage = () => {
               id="refreshInterval"
               value={refreshInterval}
               onChange={handleRefreshIntervalChange}
-              className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2 py-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 background-white"
             >
               <option value={0}>Выкл</option>
               <option value={30}>30 сек</option>
