@@ -2,38 +2,30 @@
 
 body {
   font-family: "Roboto", sans-serif;
-  background-color: #f8fafc; 
-  background-color: var(--background);
-  color: #1e293b; 
-  color: var(--text);
 }
 
 @layer utilities {
   .bg-background {
-    background-color: #f8fafc; 
     background-color: var(--background);
   }
   .text-text {
-    color: #1e293b; 
     color: var(--text);
   }
   .bg-secondary {
-    background-color: #e2e8f0;
     background-color: var(--secondary);
   }
   .text-link {
-    color: #2563eb;
     color: var(--link);
   }
   .hover\:bg-accent:hover {
-    background-color: #3b82f6; 
     background-color: var(--accent);
   }
+
   .bg-accent {
-    background-color: #3b82f6; 
     background-color: var(--accent);
   }
 }
+
 
 :root {
   --background: #f8fafc;
@@ -50,31 +42,19 @@ body {
   --link: #60a5fa;
   --accent: #1d4ed8;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --text: #f8fafc;
-    --secondary: #1e293b;
-    --link: #60a5fa;
-    --accent: #1d4ed8;
-  }
-}
-
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
 .scrollbar-none {
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  transform: translateZ(0); 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  z-index: 1000; 
 }
