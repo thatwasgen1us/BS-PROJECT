@@ -15,9 +15,9 @@ export interface Comment {
   date: string;
   site_name: string;
   status: string;
-  type_failure: null | string
-  type_: string | null; 
-  type_a: string | null; 
+  type_failure: null | string;
+  type_: string | null;
+  type_a: string | null;
 }
 
 export interface WeekData {
@@ -47,11 +47,19 @@ export const Api = createApi({
     addComment: builder.mutation<void, { base: string; comment: Comment }>({
       query: ({ base, comment }) => ({
         url: `site_info/${base}`,
-        method: 'POST',
+        method: "POST",
         body: comment,
       }),
     }),
+    getBaseVoltage: builder.query({
+      query: (base) => `voltage/${base}`
+    })
   }),
 });
 
-export const { useGetBaseDataQuery, useGetBaseInfoQuery, useAddCommentMutation } = Api;
+export const {
+  useGetBaseDataQuery,
+  useGetBaseInfoQuery,
+  useAddCommentMutation,
+  useLazyGetBaseVoltageQuery
+} = Api;
