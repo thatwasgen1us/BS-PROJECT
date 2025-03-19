@@ -6,9 +6,7 @@ export interface StationData {
   CA_52w: number;
 }
 
-export interface DataResponse {
-  data: StationData[];
-}
+export type DataResponse = StationData[];
 
 export interface Comment {
   comment: string;
