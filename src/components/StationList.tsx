@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetBaseDataQuery } from "@/api/api";
 import { Error, Spinner } from "@/components";
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 
 type Props = {
   searchTerm: string;
@@ -62,65 +62,71 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
   }
 
   return (
-    <div className="space-y-2">
-      <div className="px-2 mt-2">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={hideZeroBases}
-            onChange={(e) => setHideZeroBases(e.target.checked)}
-            className="w-5 h-5 text-blue-600 border-gray-300 rounded form-checkbox focus:ring-blue-500"
-          />
-          <span className="text-gray-700">Скрыть базы с 0% за год</span>
-        </label>
-      </div>
-      {/* Элементы управления для сортировки и чекбокс */}
-      <div className="mb-4">
-        <div className="flex justify-between px-2">
-          <button
-            className="cursor-pointer"
-            onClick={() => {
-              setSortCriteria('name');
-              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-            }}>
-            База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-          </button>
-          <button
-            className="cursor-pointer"
-            onClick={() => {
-              setSortCriteria('month');
-              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-            }}>
-            Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
-          </button>
-          <button
-            className="cursor-pointer" 
-            onClick={() => {
-              setSortCriteria('year');
-              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-            }}>
-            Год {sortCriteria === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
-          </button>
+    <div className="flex flex-col h-screen">
+      {/* Фиксированная верхняя часть */}
+      <div className="sticky top-0 z-10 px-4 border-none shadow-sm">
+        <div className="px-2 pt-2">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={hideZeroBases}
+              onChange={(e) => setHideZeroBases(e.target.checked)}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded form-checkbox focus:ring-blue-500"
+            />
+            <span className="text-gray-700">Скрыть базы с 0% за год</span>
+          </label>
+        </div>
+        {/* Элементы управления для сортировки */}
+        <div className="px-2 border-none">
+          <div className="flex justify-between">
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                setSortCriteria('name');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+              }}>
+              База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </button>
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                setSortCriteria('month');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+              }}>
+              Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </button>
+            <button
+              className="cursor-pointer" 
+              onClick={() => {
+                setSortCriteria('year');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+              }}>
+              Год {sortCriteria === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </button>
+          </div>
         </div>
       </div>
 
-      {sortedStations.length > 0 ? (
-        sortedStations.map((station, index) => (
-          <Link
-            to={`/base/${station.BS_NAME}`}
-            key={station.BS_NAME + index}
-            className={station.BS_NAME === stationId ? "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-accent hover:shadow-md" : "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-background hover:shadow-md hover:bg-accent"}
-          >
-            <div className="text-lg font-semibold text-text">
-              {station.BS_NAME}
-            </div>
-            <div className="text-lg text-text">{Number(station.CA_4w).toFixed(2)}%</div>
-            <div className="text-lg text-text">{Number(station.CA_52w).toFixed(2)}%</div>
-          </Link>
-        ))
-      ) : (
-        <div>No stations found.</div>
-      )}
+      {/* Скроллируемая нижняя часть */}
+      <div className="flex flex-col flex-1 px-2 pt-2 overflow-y-auto gap-y-2">
+        {sortedStations.length > 0 ? (
+          sortedStations.map((station, index) => (
+            <Link
+              to={`/base/${station.BS_NAME}`}
+              key={station.BS_NAME + index}
+              className={station.BS_NAME === stationId ? "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-accent hover:shadow-md" : "flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm bg-background hover:shadow-md hover:bg-accent"}
+            >
+              <div className="text-lg font-semibold text-text">
+                {station.BS_NAME}
+              </div>
+              <div className="text-lg text-text">{Number(station.CA_4w).toFixed(2)}%</div>
+              <div className="text-lg text-text">{Number(station.CA_52w).toFixed(2)}%</div>
+            </Link>
+          ))
+        ) : (
+          <div>No stations found.</div>
+        )}
+      </div>
     </div>
   );
 };
