@@ -16,7 +16,7 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); 
 
   const filteredStations = data
-    ? data.data.filter((station) => {
+    ? data.filter((station) => {
         const isUnique = !uniqueStationNames.has(station.BS_NAME);
         uniqueStationNames.add(station.BS_NAME);
         return (
@@ -96,8 +96,8 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
             <div className="text-lg font-semibold text-text">
               {station.BS_NAME}
             </div>
-            <div className="text-lg text-text">{station.CA_4w}%</div>
-            <div className="text-lg text-text">{station.CA_52w}%</div>
+            <div className="text-lg text-text">{Number(station.CA_4w).toFixed(2)}%</div>
+            <div className="text-lg text-text">{Number(station.CA_52w).toFixed(2)}%</div>
           </Link>
         ))
       ) : (
