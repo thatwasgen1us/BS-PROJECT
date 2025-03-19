@@ -60,7 +60,7 @@ const calculateDuration = (timestamp: string): string => {
 const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW_", "SECOFF", "FIRE"];
 
 const BsVoltage = () => {
-  const { data: baseData, error } = useGetBaseDataQuery();
+  const { data: baseData } = useGetBaseDataQuery();
   const [newBsName, setNewBsName] = useState<string>("NS");
   const [bssList, setBssList] = useState<BaseStation[]>(() => {
     const savedBssList = localStorage.getItem("bssList");
