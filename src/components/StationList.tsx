@@ -86,7 +86,7 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
           </label>
         </div>
         {/* Элементы управления для сортировки */}
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center justify-around py-2 font-bold">
           <button
             className="cursor-pointer hover:text-blue-600"
             onClick={() => handleSort('name')}
