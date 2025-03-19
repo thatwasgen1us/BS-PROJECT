@@ -14,15 +14,15 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
 
   const [sortCriteria, setSortCriteria] = useState<'name' | 'month' | 'year'>('name'); 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); 
+  const [hideZeroBases, setHideZeroBases] = useState(false); 
 
   const filteredStations = data
     ? data.filter((station) => {
         const isUnique = !uniqueStationNames.has(station.BS_NAME);
         uniqueStationNames.add(station.BS_NAME);
-        return (
-          isUnique &&
-          station.BS_NAME.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const matchesSearchTerm = station.BS_NAME.toLowerCase().includes(searchTerm.toLowerCase());
+        const isZeroBase = hideZeroBases ? Number(station.CA_52w) !== 0 : true;
+        return isUnique && matchesSearchTerm && isZeroBase;
       })
     : [];
 
@@ -56,31 +56,42 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
 
   return (
     <div className="space-y-2">
-      {/* Элементы управления для сортировки */}
+      <div className="px-2 mt-2">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={hideZeroBases}
+              onChange={(e) => setHideZeroBases(e.target.checked)}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded form-checkbox focus:ring-blue-500"
+            />
+            <span className="text-gray-700">Скрыть базы с 0% за год</span>
+          </label>
+        </div>
+      {/* Элементы управления для сортировки и чекбокс */}
       <div className="mb-4">
-        <div className="flex justify-between">
+        <div className="flex justify-between px-2">
           <button
             className="cursor-pointer"
             onClick={() => {
-            setSortCriteria('name');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-          }}>
+              setSortCriteria('name');
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+            }}>
             База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
           <button
             className="cursor-pointer"
             onClick={() => {
-            setSortCriteria('month');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-          }}>
+              setSortCriteria('month');
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+            }}>
             Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
           <button
             className="cursor-pointer" 
             onClick={() => {
-            setSortCriteria('year');
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
-          }}>
+              setSortCriteria('year');
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); 
+            }}>
             Год {sortCriteria === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
           </button>
         </div>
