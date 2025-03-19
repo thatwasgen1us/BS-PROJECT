@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useLazyGetBaseVoltageQuery } from "../api/api";
+import { useGetBaseDataQuery, useLazyGetBaseVoltageQuery } from "../api/api";
 
 interface BaseStation {
   name: string;
@@ -16,12 +16,12 @@ const formatTimestamp = (timestamp: string): string => {
   if (!timestamp) return "No data";
 
   const year = parseInt(timestamp.slice(0, 4)),
-        month = parseInt(timestamp.slice(4, 6)) - 1,
-        day = parseInt(timestamp.slice(6, 8)),
-        hours = parseInt(timestamp.slice(8, 10)),
-        minutes = parseInt(timestamp.slice(10, 12)),
-        seconds = parseInt(timestamp.slice(12, 14)),
-        milliseconds = parseInt(timestamp.slice(15, 18));
+    month = parseInt(timestamp.slice(4, 6)) - 1,
+    day = parseInt(timestamp.slice(6, 8)),
+    hours = parseInt(timestamp.slice(8, 10)),
+    minutes = parseInt(timestamp.slice(10, 12)),
+    seconds = parseInt(timestamp.slice(12, 14)),
+    milliseconds = parseInt(timestamp.slice(15, 18));
 
   const date = new Date(year, month, day, hours, minutes, seconds, milliseconds);
 
@@ -39,12 +39,12 @@ const calculateDuration = (timestamp: string): string => {
   if (!timestamp) return "N/A";
 
   const year = parseInt(timestamp.slice(0, 4)),
-        month = parseInt(timestamp.slice(4, 6)) - 1,
-        day = parseInt(timestamp.slice(6, 8)),
-        hours = parseInt(timestamp.slice(8, 10)),
-        minutes = parseInt(timestamp.slice(10, 12)),
-        seconds = parseInt(timestamp.slice(12, 14)),
-        milliseconds = parseInt(timestamp.slice(15, 18));
+    month = parseInt(timestamp.slice(4, 6)) - 1,
+    day = parseInt(timestamp.slice(6, 8)),
+    hours = parseInt(timestamp.slice(8, 10)),
+    minutes = parseInt(timestamp.slice(10, 12)),
+    seconds = parseInt(timestamp.slice(12, 14)),
+    milliseconds = parseInt(timestamp.slice(15, 18));
 
   const alarmDate = new Date(year, month, day, hours, minutes, seconds, milliseconds);
   const now = new Date();
@@ -60,6 +60,7 @@ const calculateDuration = (timestamp: string): string => {
 const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW_", "SECOFF", "FIRE"];
 
 const BsVoltage = () => {
+  const { data: baseData, error } = useGetBaseDataQuery();
   const [newBsName, setNewBsName] = useState<string>("NS");
   const [bssList, setBssList] = useState<BaseStation[]>(() => {
     const savedBssList = localStorage.getItem("bssList");
@@ -125,47 +126,33 @@ const BsVoltage = () => {
       return;
     }
 
-    const exists = bssList.some((bs) => bs.name === newBsName);
-    if (exists) {
+    const existsInBssList = bssList.some((bs) => bs.name === newBsName);
+    if (existsInBssList) {
       setErrorMessage("БС с таким номером уже существует!");
       return;
     }
 
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const response = await trigger(newBsName);
-
-      if (response.error) {
-        setErrorMessage("Ошибка при получении данных.");
-        return;
-      }
-
-      if (response.data) {
-        const voltageData = response.data[0]?.voltage?.[newBsName] || 0;
-        const alarms = response.data[1]?.alarms || {};
-
-        const newBs: BaseStation = {
-          name: newBsName,
-          power: "N/A",
-          voltage: voltageData,
-          duration: "N/A",
-          estimatedTime: "N/A",
-          status: "N/A",
-          lastUpdated: new Date().toLocaleString(),
-          alarms: alarms,
-        };
-
-        setBssList((prev) => [...prev, newBs]);
-        setNewBsName("NS");
-      }
-    } catch (err) {
-      console.error("Ошибка при выполнении запроса:", err);
-      setErrorMessage("Произошла ошибка при добавлении БС.");
-    } finally {
-      setIsLoading(false);
+    // Проверяем, есть ли база в данных (baseData)
+    const baseInData = baseData?.find((bs) => bs.BS_NAME === newBsName);
+    if (!baseInData) {
+      setErrorMessage("База с таким номером не найдена в данных.");
+      return;
     }
+
+    // Добавляем новую БС с данными из baseData
+    const newBs: BaseStation = {
+      name: newBsName,
+      power: "N/A",
+      voltage: 0,
+      duration: "N/A",
+      estimatedTime: "N/A",
+      status: "N/A",
+      lastUpdated: "N/A",
+      alarms: {},
+    };
+
+    setBssList((prev) => [...prev, newBs]);
+    setNewBsName("NS");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,14 +194,7 @@ const BsVoltage = () => {
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 border-2 border-t-2 border-white rounded-full border-t-transparent animate-spin"></div>
-                <span className="ml-2">Загрузка...</span>
-              </div>
-            ) : (
-              "Добавить БС"
-            )}
+            Добавить БС
           </button>
         </form>
 
@@ -268,8 +248,8 @@ const BsVoltage = () => {
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200 rounded">
           {bssList.map((bs) => {
-            const hasPowerAlarm = !!bs.alarms?.POWER; 
-            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A"; 
+            const hasPowerAlarm = !!bs.alarms?.POWER;
+            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
 
             return (
               <div
@@ -279,7 +259,7 @@ const BsVoltage = () => {
                 <div>{bs.name}</div>
                 <div>
                   {ALLOWED_ALARMS.map((alarm) => {
-                    const timestamp = bs.alarms?.[alarm]; 
+                    const timestamp = bs.alarms?.[alarm];
                     if (timestamp) {
                       return (
                         <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
