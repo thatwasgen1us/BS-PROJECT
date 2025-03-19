@@ -5,7 +5,7 @@ const Stations = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   return (
-    <aside className="min-w-[350px] bg-blue-50 rounded-lg shadow-lg scrollbar-none pb-6 h-full">
+    <aside className="min-w-[350px] bg-blue-50 rounded-lg shadow-lg scrollbar-none pb-6 h-full overflow-hidden">
       <div>
         {/* Поле ввода */}
         <div className="p-4 pb-0 mb-6">
