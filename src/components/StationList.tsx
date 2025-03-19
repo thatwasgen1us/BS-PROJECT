@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetBaseDataQuery } from "@/api/api";
 import { Error, Spinner } from "@/components";
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
 
 type Props = {
   searchTerm: string;
@@ -14,7 +14,14 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
 
   const [sortCriteria, setSortCriteria] = useState<'name' | 'month' | 'year'>('name'); 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); 
-  const [hideZeroBases, setHideZeroBases] = useState(false); 
+  const [hideZeroBases, setHideZeroBases] = useState(() => {
+    const savedValue = localStorage.getItem('hideZeroBases');
+    return savedValue === 'true'; 
+  });
+
+  useEffect(() => {
+    localStorage.setItem('hideZeroBases', hideZeroBases.toString());
+  }, [hideZeroBases]);
 
   const filteredStations = data
     ? data.filter((station) => {
@@ -57,16 +64,16 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
   return (
     <div className="space-y-2">
       <div className="px-2 mt-2">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={hideZeroBases}
-              onChange={(e) => setHideZeroBases(e.target.checked)}
-              className="w-5 h-5 text-blue-600 border-gray-300 rounded form-checkbox focus:ring-blue-500"
-            />
-            <span className="text-gray-700">Скрыть базы с 0% за год</span>
-          </label>
-        </div>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={hideZeroBases}
+            onChange={(e) => setHideZeroBases(e.target.checked)}
+            className="w-5 h-5 text-blue-600 border-gray-300 rounded form-checkbox focus:ring-blue-500"
+          />
+          <span className="text-gray-700">Скрыть базы с 0% за год</span>
+        </label>
+      </div>
       {/* Элементы управления для сортировки и чекбокс */}
       <div className="mb-4">
         <div className="flex justify-between px-2">
