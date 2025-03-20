@@ -201,7 +201,7 @@ const BsVoltage = () => {
           </button>
           ) : (
             <button
-            className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-white bg-blue-500 rounded-md cursor-pointer hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
             type="submit"
             disabled={isLoading}
           >
@@ -228,7 +228,7 @@ const BsVoltage = () => {
           ) : (
             <button
             onClick={refreshData}
-            className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-white bg-green-500 rounded-md cursor-pointer hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed"
             disabled={isLoading}
           >
             Обновить данные
