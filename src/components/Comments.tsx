@@ -101,6 +101,7 @@ const Comments: React.FC<Props> = ({ data }) => {
             <option value="АКБ">АКБ</option>
             <option value="Транспорт">Транспорт</option>
             <option value="АКБ + транспорт">АКБ + транспорт</option>
+            <option value="БС">БС</option>
             <option value="Иное">Иное</option>
           </select>
   
