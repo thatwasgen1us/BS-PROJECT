@@ -57,7 +57,7 @@ const calculateDuration = (timestamp: string): string => {
   return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
 };
 
-const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW_", "SECOFF", "FIRE"];
+const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW", "SECOFF", "FIRE"];
 
 const BsVoltage = () => {
   const { data: baseData } = useGetBaseDataQuery();
