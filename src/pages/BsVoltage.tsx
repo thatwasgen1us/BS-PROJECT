@@ -185,8 +185,8 @@ const BsVoltage = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 pt-16 mt-6 overflow-x-auto rounded-lg shadow-lg bg-blue-50">
-      <div className="text-center ">
+    <div className="max-h-screen min-h-screen p-6 pt-16 pb-10 mt-6 rounded-lg shadow-lg bg-blue-50">
+      <div className="ext-center ">
         {/* Форма добавления БС */}
         <form className="flex mb-4 space-x-2" onSubmit={handleAddBs}>
           <input
@@ -284,7 +284,7 @@ const BsVoltage = () => {
         </div>
 
         {/* Данные таблицы */}
-        <div className="text-center bg-white divide-y divide-gray-200 rounded shadow">
+        <div className="overflow-y-scroll text-center bg-white divide-y divide-gray-200 rounded shadow max-h-150">
           {bssList.map((bs) => {
             const hasPowerAlarm = !!bs.alarms?.POWER;
             const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
