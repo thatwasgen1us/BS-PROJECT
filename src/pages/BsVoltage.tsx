@@ -271,74 +271,76 @@ const BsVoltage = () => {
           </div>
         )}
 
-        {/* Заголовки таблицы */}
-        <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
-          <div>BSS</div>
-          <div>Alarms</div>
-          <div>Duration</div>
-          <div>Voltage</div>
-          <div>Estimated Time</div>
-          <div>Status</div>
-          <div>Last Updated</div>
-          <div>Actions</div>
-        </div>
-
-        {/* Данные таблицы */}
-        <div className="overflow-y-scroll text-center bg-white divide-y divide-gray-200 rounded shadow max-h-150">
-          {bssList.map((bs) => {
-            const hasPowerAlarm = !!bs.alarms?.POWER;
-            const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
-
-            return (
-              <div
-                key={bs.name}
-                className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
-              >
-                <div>{bs.name}</div>
-                <div>
-                  {ALLOWED_ALARMS.map((alarm) => {
-                    const timestamp = bs.alarms?.[alarm];
-                    if (timestamp) {
-                      return (
-                        <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
-                          {alarm}: {formatTimestamp(timestamp)}
-                        </div>
-                      );
+        <div className="overflow-y-scroll max-h-150">
+          {/* Заголовки таблицы */}
+          <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
+            <div>BSS</div>
+            <div>Alarms</div>
+            <div>Duration</div>
+            <div>Voltage</div>
+            <div>Estimated Time</div>
+            <div>Status</div>
+            <div>Last Updated</div>
+            <div>Actions</div>
+          </div>
+  
+          {/* Данные таблицы */}
+          <div className="text-center bg-white divide-y divide-gray-200 rounded shadow ">
+            {bssList.map((bs) => {
+              const hasPowerAlarm = !!bs.alarms?.POWER;
+              const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
+  
+              return (
+                <div
+                  key={bs.name}
+                  className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+                >
+                  <div>{bs.name}</div>
+                  <div>
+                    {ALLOWED_ALARMS.map((alarm) => {
+                      const timestamp = bs.alarms?.[alarm];
+                      if (timestamp) {
+                        return (
+                          <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
+                            {alarm}: {formatTimestamp(timestamp)}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                  <div>{duration}</div>
+                  <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
+                    {typeof bs.voltage === 'number' ? (
+                      <p>{bs.voltage} V</p>
+                    ) : (
+                      <p className="text-red-500">{bs.voltage}</p>
+                    )
                     }
-                    return null;
-                  })}
+                  </div>
+                  <div>{bs.estimatedTime}</div>
+                  <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
+                    {bs.status}
+                  </div>
+                  <div>{bs.lastUpdated}</div>
+                  <div>
+                    <button
+                      onClick={() => handleDeleteBs(bs.name)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </TrashIcon>
+                    </button>
+                  </div>
                 </div>
-                <div>{duration}</div>
-                <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
-                  {typeof bs.voltage === 'number' ? (
-                    <p>{bs.voltage} V</p>
-                  ) : (
-                    <p className="text-red-500">{bs.voltage}</p>
-                  )
-                  }
-                </div>
-                <div>{bs.estimatedTime}</div>
-                <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
-                  {bs.status}
-                </div>
-                <div>{bs.lastUpdated}</div>
-                <div>
-                  <button
-                    onClick={() => handleDeleteBs(bs.name)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </TrashIcon>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
