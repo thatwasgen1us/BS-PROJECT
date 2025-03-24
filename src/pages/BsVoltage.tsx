@@ -1,5 +1,6 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { useGetBaseDataQuery, useLazyGetBaseVoltageQuery } from "../api/api";
+import styled, { keyframes } from "styled-components";
 
 interface BaseStation {
   name: string;
@@ -11,6 +12,15 @@ interface BaseStation {
   lastUpdated: string;
   alarms: Record<string, string | null>;
 }
+
+const TrashIcon = styled.svg`
+  width: 1.25rem;
+  height: 1.25rem;
+  color: currentColor;
+  &:hover {
+    color: #ef4444; /* Красный цвет при наведении */
+  }
+`;
 
 const formatTimestamp = (timestamp: string): string => {
   if (!timestamp) return "No data";
@@ -175,12 +185,12 @@ const BsVoltage = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 pt-16 mt-6 overflow-x-auto bg-blue-100 rounded-lg shadow-md">
+    <div className="min-h-screen p-6 pt-16 mt-6 overflow-x-auto rounded-lg shadow-lg bg-blue-50">
       <div className="text-center ">
         {/* Форма добавления БС */}
         <form className="flex mb-4 space-x-2" onSubmit={handleAddBs}>
           <input
-            className="px-4 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-text"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={newBsName}
             onChange={handleInputChange}
             placeholder="Введите название БС (NSXXXX)"
@@ -274,7 +284,7 @@ const BsVoltage = () => {
         </div>
 
         {/* Данные таблицы */}
-        <div className="text-center bg-white divide-y divide-gray-200 rounded">
+        <div className="text-center bg-white divide-y divide-gray-200 rounded shadow">
           {bssList.map((bs) => {
             const hasPowerAlarm = !!bs.alarms?.POWER;
             const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
@@ -317,7 +327,13 @@ const BsVoltage = () => {
                     onClick={() => handleDeleteBs(bs.name)}
                     className="text-red-500 hover:text-red-700"
                   >
-                    Удалить
+                    <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </TrashIcon>
                   </button>
                 </div>
               </div>
