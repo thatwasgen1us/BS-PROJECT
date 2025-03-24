@@ -300,7 +300,12 @@ const BsVoltage = () => {
                 </div>
                 <div>{duration}</div>
                 <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
-                  {bs.voltage} V
+                  {typeof bs.voltage === 'number' ? (
+                    <p>{bs.voltage} V</p>
+                  ) : (
+                    <p className="text-red-500">{bs.voltage}</p>
+                  )
+                  }
                 </div>
                 <div>{bs.estimatedTime}</div>
                 <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
