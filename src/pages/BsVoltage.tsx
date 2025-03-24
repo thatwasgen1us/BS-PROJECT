@@ -271,7 +271,7 @@ const BsVoltage = () => {
           </div>
         )}
 
-        <div className="overflow-y-scroll max-h-150">
+        <div className="overflow-y-scroll max-h-[700px]">
           {/* Заголовки таблицы */}
           <div className="grid items-center grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
             <div>BSS</div>
