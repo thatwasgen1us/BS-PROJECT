@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { useGetBaseDataQuery, useLazyGetBaseVoltageQuery } from "../api/api";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 interface BaseStation {
   name: string;
