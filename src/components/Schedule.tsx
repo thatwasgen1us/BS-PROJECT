@@ -13,7 +13,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
   const hasData = Array.isArray(dataObj) && dataObj.length > 0;
 
   const limitedData = useMemo(
-    () => (hasData ? dataObj.slice(0, 52) : []),
+    () => (hasData ? dataObj.slice(-52) : []),
     [dataObj, hasData]
   );
 
