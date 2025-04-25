@@ -24,12 +24,6 @@ interface ExternalApiStation {
   lastUpdated?: string;
 }
 
-interface VoltageResponse {
-  [baseStation: string]: [
-    { voltage: number },
-    { alarms: Record<string, string> }
-  ];
-}
 
 const TrashIcon = styled.svg`
   width: 1.25rem;
