@@ -32,8 +32,31 @@ export interface SiteInfo {
   comment: null | Comment[];
   site_info: WeekData[];
 }
+
+type VoltageValue = number | string;
+
+interface VoltageData {
+  [baseStation: string]: VoltageValue;
+}
+
+interface AlarmStatus {
+  status?: string;
+  [alarmType: string]: string | undefined;
+}
+
+interface AlarmsData {
+  [baseStation: string]: AlarmStatus;
+}
+
+interface ApiResponseItem {
+  voltage?: VoltageData;
+  alarms?: AlarmsData;
+}
+
+export type ExternalApiResponse = ApiResponseItem[];
 export const Api = createApi({
   reducerPath: "api",
+  // Основной базовый URL
   baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.213:430/" }),
   endpoints: (builder) => ({
     getBaseData: builder.query<DataResponse | undefined, void>({
@@ -51,7 +74,13 @@ export const Api = createApi({
     }),
     getBaseVoltage: builder.query({
       query: (base) => `voltage/${base}`
-    })
+    }),
+    getLastDataFromExternalApi: builder.query<ExternalApiResponse, void>({
+      query: () => ({
+        url: "https://10.77.28.213:5000/api/last_data",
+        baseUrl: ""
+      }),
+    }),
   }),
 });
 
@@ -59,5 +88,6 @@ export const {
   useGetBaseDataQuery,
   useGetBaseInfoQuery,
   useAddCommentMutation,
-  useLazyGetBaseVoltageQuery
+  useLazyGetBaseVoltageQuery,
+  useGetLastDataFromExternalApiQuery
 } = Api;
