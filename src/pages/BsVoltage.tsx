@@ -1,16 +1,34 @@
 import React, { FormEvent, useEffect, useState, useMemo } from "react";
-import { useGetBaseDataQuery, useLazyGetBaseVoltageQuery } from "../api/api";
+import { 
+  useGetBaseDataQuery, 
+  useLazyGetBaseVoltageQuery,
+  useGetLastDataFromExternalApiQuery 
+} from "@/api/api";
 import styled from "styled-components";
 
 interface BaseStation {
   name: string;
   power: string;
-  voltage: number;
+  voltage: number | string;
   duration: string;
   estimatedTime: string;
   status: string;
   lastUpdated: string;
   alarms: Record<string, string | null>;
+}
+
+interface ExternalApiStation {
+  name: string;
+  voltage: number | string;
+  alarms: Record<string, string>;
+  lastUpdated?: string;
+}
+
+interface VoltageResponse {
+  [baseStation: string]: [
+    { voltage: number },
+    { alarms: Record<string, string> }
+  ];
 }
 
 const TrashIcon = styled.svg`
@@ -23,7 +41,7 @@ const TrashIcon = styled.svg`
 `;
 
 const formatTimestamp = (timestamp: string): string => {
-  if (!timestamp) return "No data";
+  if (!timestamp || timestamp === "БС недоступна") return "No data";
 
   const year = parseInt(timestamp.slice(0, 4)),
     month = parseInt(timestamp.slice(4, 6)) - 1,
@@ -46,7 +64,7 @@ const formatTimestamp = (timestamp: string): string => {
 };
 
 const calculateDuration = (timestamp: string): string => {
-  if (!timestamp) return "N/A";
+  if (!timestamp || timestamp === "БС недоступна") return "N/A";
 
   const year = parseInt(timestamp.slice(0, 4)),
     month = parseInt(timestamp.slice(4, 6)) - 1,
@@ -85,21 +103,24 @@ const BsVoltage = () => {
     direction: 'ascending' | 'descending';
   } | null>(null);
 
+  const [trigger] = useLazyGetBaseVoltageQuery();
+  const { data: externalData, isLoading: isExternalLoading, refetch: refetchExternalData } = useGetLastDataFromExternalApiQuery();
+
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
   }, [bssList]);
-
-  const [trigger] = useLazyGetBaseVoltageQuery();
 
   const sortedBssList = useMemo(() => {
     let sortableItems = [...bssList];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         if (sortConfig.key === 'voltage') {
-          if (a.voltage < b.voltage) {
+          const aVoltage = typeof a.voltage === 'number' ? a.voltage : 0;
+          const bVoltage = typeof b.voltage === 'number' ? b.voltage : 0;
+          if (aVoltage < bVoltage) {
             return sortConfig.direction === 'ascending' ? -1 : 1;
           }
-          if (a.voltage > b.voltage) {
+          if (aVoltage > bVoltage) {
             return sortConfig.direction === 'ascending' ? 1 : -1;
           }
           return 0;
@@ -132,6 +153,51 @@ const BsVoltage = () => {
     return sortableItems;
   }, [bssList, sortConfig]);
 
+  const externalStations = useMemo(() => {
+    if (!externalData) return [];
+    
+    const result: ExternalApiStation[] = [];
+    const now = new Date().toLocaleString();
+    
+    // Обрабатываем данные напряжения
+    const voltageData = externalData[0]?.voltage || {};
+    Object.entries(voltageData).forEach(([name, voltage]) => {
+      result.push({
+        name,
+        voltage,
+        alarms: {},
+        lastUpdated: now
+      });
+    });
+    
+    // Добавляем данные аварий
+    const alarmsData = externalData[1]?.alarms || {};
+    Object.entries(alarmsData).forEach(([name, alarms]) => {
+      const station = result.find(s => s.name === name) || {
+        name,
+        voltage: voltageData[name] || "N/A",
+        alarms: {},
+        lastUpdated: now
+      };
+      
+      if (alarms.status === "БС недоступна") {
+        station.voltage = "БС недоступна";
+      } else {
+        Object.entries(alarms).forEach(([alarmType, timestamp]) => {
+          if (alarmType !== "status" && timestamp) {
+            station.alarms[alarmType] = timestamp;
+          }
+        });
+      }
+      
+      if (!result.some(s => s.name === name)) {
+        result.push(station);
+      }
+    });
+    
+    return result;
+  }, [externalData]);
+
   const requestSort = (key: string) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig?.key === key && sortConfig.direction === 'ascending') {
@@ -148,11 +214,12 @@ const BsVoltage = () => {
         bssList.map(async (bs) => {
           const response = await trigger(bs.name);
           if (response.data) {
-            const voltageData = response.data[0]?.voltage?.[bs.name] || 0;
-            const alarms = response.data[1]?.alarms || {};
+            const stationData = response.data[bs.name];
+            const voltage = stationData?.[0]?.voltage || 0;
+            const alarms = stationData?.[1]?.alarms || {};
             return {
               ...bs,
-              voltage: voltageData,
+              voltage: voltage,
               alarms: alarms,
               lastUpdated: new Date().toLocaleString(),
             };
@@ -169,10 +236,22 @@ const BsVoltage = () => {
     }
   };
 
+  const refreshExternalData = async () => {
+    try {
+      await refetchExternalData();
+    } catch (err) {
+      console.error("Ошибка при обновлении внешних данных:", err);
+      setErrorMessage("Произошла ошибка при обновлении внешних данных.");
+    }
+  };
+
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (refreshEnabled && refreshInterval > 0) {
-      intervalId = setInterval(refreshData, refreshInterval * 1000);
+      intervalId = setInterval(() => {
+        refreshData();
+        refreshExternalData();
+      }, refreshInterval * 1000);
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -234,8 +313,103 @@ const BsVoltage = () => {
   };
 
   return (
-    <div className="max-h-screen min-h-screen p-6 pt-16 pb-10 mt-6 rounded-lg shadow-lg bg-blue-50">
-      <div className="ext-center">
+    <div className="max-h-screen min-h-screen p-6 pt-16 pb-10 mt-6 overflow-y-scroll rounded-lg shadow-lg bg-blue-50">
+      {/* Вторая таблица - данные из внешнего API */}
+      <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Данные с внешнего API</h2>
+          <button
+            onClick={refreshExternalData}
+            className="px-4 py-2 text-white bg-blue-500 rounded-md cursor-pointer hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+            disabled={isExternalLoading}
+          >
+            {isExternalLoading ? (
+              <>
+                <svg aria-hidden="true" role="status" className="inline w-4 h-4 text-white me-3 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                </svg>
+                Обновление...
+              </>
+            ) : (
+              "Обновить"
+            )}
+          </button>
+        </div>
+        <div className="overflow-y-scroll max-h-[700px] text-center mb-4">
+          <div className="grid grid-cols-6 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
+            <div className="flex items-center justify-center">BSS</div>
+            <div className="flex items-center justify-center">Voltage</div>
+            <div className="flex items-center justify-center">Alarms</div>
+            <div className="flex items-center justify-center">Duration</div>
+            <div className="flex items-center justify-center">Status</div>
+            <div className="flex items-center justify-center">Lsst Updated</div>
+          </div>
+
+          <div className="text-center bg-white divide-y divide-gray-200 rounded shadow">
+            {isExternalLoading ? (
+              <div className="p-4 text-center">
+                <svg aria-hidden="true" role="status" className="inline w-4 h-4 text-blue-500 me-3 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                </svg>
+                Загрузка данных...
+              </div>
+            ) : externalStations.length > 0 ? (
+              externalStations.map((station) => {
+                const hasAlarms = Object.keys(station.alarms).length > 0;
+                const firstAlarm = hasAlarms ? station.alarms[Object.keys(station.alarms)[0]] : null;
+                const duration = firstAlarm ? calculateDuration(firstAlarm) : "N/A";
+                const status = station.voltage === "БС недоступна" 
+                  ? "Недоступна" 
+                  : hasAlarms 
+                    ? "Авария" 
+                    : "Норма";
+
+                return (
+                  <div
+                    key={station.name}
+                    className="grid grid-cols-6 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+                  >
+                    <div>{station.name}</div>
+                    <div className={`text-center ${
+                      typeof station.voltage === 'number' 
+                        ? (station.voltage < 50 ? "text-red-500" : "text-green-500")
+                        : "text-red-500"
+                    }`}>
+                      {typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
+                    </div>
+                    <div className="text-left">
+                      {hasAlarms ? (
+                        Object.entries(station.alarms).map(([alarm, timestamp]) => (
+                          <div key={alarm} className="text-sm text-red-500">
+                            {alarm}: {formatTimestamp(timestamp)}
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-green-500">Нет аварий</span>
+                      )}
+                    </div>
+                    <div>{duration}</div>
+                    <div className={`text-center ${
+                      status === "Авария" ? "text-red-500" : 
+                      status === "Недоступна" ? "text-orange-500" : "text-green-500"
+                    }`}>
+                      {status}
+                    </div>
+                    <div>
+                      datatime
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-4 text-center text-gray-500">
+                Нет данных для отображения
+              </div>
+            )}
+          </div>
+        </div>
+      <div className="text-center ">
         <form className="flex mb-4 space-x-2" onSubmit={handleAddBs}>
           <input
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -260,7 +434,9 @@ const BsVoltage = () => {
           )}
         </form>
 
-        <div className="flex items-center justify-center mb-4 space-x-4">
+        <div className="flex items-center justify-between mb-4 space-x-4">
+          <h2 className="mb-2 text-xl font-semibold text-center">Мониторинг базовых станций</h2>
+
           {isLoading ? (
             <button className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed" disabled>
               <svg aria-hidden="true" role="status" className="inline w-4 h-4 text-white me-3 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -300,10 +476,11 @@ const BsVoltage = () => {
           </div>
         )}
 
-        <div className="overflow-y-scroll max-h-[700px] text-center">
-          <div className="grid grid-cols-8 gap-4 p-3 font-semiboldrounded-t-lg bg-background text-text">
+        {/* Первая таблица - пользовательские БС */}
+        <div className="overflow-y-scroll max-h-[700px] text-center mb-8">
+          <div className="grid grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('name')}
             >
               <span>BSS</span>
@@ -312,7 +489,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('alarms')}
             >
               <span>Alarms</span>
@@ -321,7 +498,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('duration')}
             >
               <span>Duration</span>
@@ -330,7 +507,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('voltage')}
             >
               <span>Voltage</span>
@@ -339,7 +516,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('estimatedTime')}
             >
               <span>Estimated Time</span>
@@ -348,7 +525,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('status')}
             >
               <span>Status</span>
@@ -357,7 +534,7 @@ const BsVoltage = () => {
               )}
             </div>
             <div 
-              className="flex items-center justify-center rounded cursor-pointer jus hover:opacity-70"
+              className="flex items-center justify-center rounded cursor-pointer hover:opacity-70"
               onClick={() => requestSort('lastUpdated')}
             >
               <span>Last Updated</span>
@@ -385,7 +562,7 @@ const BsVoltage = () => {
                         const timestamp = bs.alarms?.[alarm];
                         if (timestamp) {
                           return (
-                            <div key={alarm} className="text-sm text-left text-red-500 text-nowrap">
+                            <div key={alarm} className="text-sm text-left text-red-500">
                               {alarm}: {formatTimestamp(timestamp)}
                             </div>
                           );
@@ -394,15 +571,17 @@ const BsVoltage = () => {
                       })}
                     </div>
                     <div>{duration}</div>
-                    <div className={`text-center ${bs.voltage < 50 ? "text-red-500" : "text-green-500"}`}>
-                      {typeof bs.voltage === 'number' ? (
-                        <p>{bs.voltage} V</p>
-                      ) : (
-                        <p className="text-red-500">{bs.voltage}</p>
-                      )}
+                    <div className={`text-center ${
+                      typeof bs.voltage === 'number' 
+                        ? (bs.voltage < 50 ? "text-red-500" : "text-green-500")
+                        : "text-red-500"
+                    }`}>
+                      {typeof bs.voltage === 'number' ? `${bs.voltage} V` : bs.voltage}
                     </div>
                     <div>{bs.estimatedTime}</div>
-                    <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"}`}>
+                    <div className={`text-center ${
+                      bs.status === "Accident" ? "text-red-500" : "text-green-500"
+                    }`}>
                       {bs.status}
                     </div>
                     <div>{bs.lastUpdated}</div>
@@ -430,6 +609,7 @@ const BsVoltage = () => {
             )}
           </div>
         </div>
+        
       </div>
     </div>
   );
