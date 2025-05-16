@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { StationDataVoltage } from "../pages/bsSchedule";
 
 export interface StationData {
   BS_NAME: string;
@@ -81,6 +82,12 @@ export const Api = createApi({
         baseUrl: ""
       }),
     }),
+     getBseVoltageInfo: builder.query<StationDataVoltage| null, string>({
+      query: (base) => ({
+        url: `https://10.77.28.213:430/graf_voltage/${base}`,
+        baseUrl: ""
+      }),
+    }),
   }),
 });
 
@@ -89,5 +96,6 @@ export const {
   useGetBaseInfoQuery,
   useAddCommentMutation,
   useLazyGetBaseVoltageQuery,
-  useGetLastDataFromExternalApiQuery
+  useGetLastDataFromExternalApiQuery,
+  useGetBseVoltageInfoQuery
 } = Api;
