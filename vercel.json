@@ -1,5 +1,6 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+   "buildCommand": "npm install lightningcss-linux-x64-gnu @esbuild/linux-x64 @rollup/rollup-linux-x64-gnu --no-save && npm run build"
 }
