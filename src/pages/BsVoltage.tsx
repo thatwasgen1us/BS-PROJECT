@@ -32,7 +32,7 @@ interface ExternalApiStation {
 
 // Константы
 const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW", "SECOFF", "FIRE"];
-const EXTERNAL_API_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 минут
+const EXTERNAL_API_REFRESH_INTERVAL = 3 * 60 * 1000;
 
 // Стилизованные компоненты
 const TrashIcon = styled.svg`
@@ -362,10 +362,10 @@ const BsVoltage = () => {
         if (externalSortConfig.key === 'duration') {
           const aDuration = Object.values(a.alarms).find(t => t) || "";
           const bDuration = Object.values(b.alarms).find(t => t) || "";
-          
+
           const aTime = aDuration ? calculateDuration(String(aDuration)).split(':').reduce((acc, time) => (60 * acc) + +time, 0) : 0;
           const bTime = bDuration ? calculateDuration(String(bDuration)).split(':').reduce((acc, time) => (60 * acc) + +time, 0) : 0;
-          
+
           if (aTime < bTime) {
             return externalSortConfig.direction === 'ascending' ? -1 : 1;
           }
@@ -433,84 +433,82 @@ const BsVoltage = () => {
   );
 
   const renderExternalStationRow = (station: ExternalApiStation) => {
-  const isErrorState = station.voltage === "Ошибка";
-  
-  let activeAlarms: [string, string][] = [];
-  let hasAlarms = false;
-  let firstAlarmTimestamp = null;
+    const isErrorState = station.voltage === "Ошибка";
 
-  if (isErrorState) {
-    hasAlarms = true;
-  } else if (typeof station.alarms === 'object' && station.alarms !== null) {
-    // Нормальный случай - alarms это объект
-    activeAlarms = Object.entries(station.alarms)
-      .filter(([key]) => key !== 'No_connection_to_unit' && key !== 'status');
-    hasAlarms = activeAlarms.length > 0;
-    firstAlarmTimestamp = hasAlarms ? activeAlarms[0][1] : null;
-  }
+    let activeAlarms: [string, string][] = [];
+    let hasAlarms = false;
+    let firstAlarmTimestamp = null;
 
-  const duration = firstAlarmTimestamp ? calculateDuration(firstAlarmTimestamp) : "N/A";
+    if (isErrorState) {
+      hasAlarms = true;
+    } else if (typeof station.alarms === 'object' && station.alarms !== null) {
+      // Нормальный случай - alarms это объект
+      activeAlarms = Object.entries(station.alarms)
+        .filter(([key]) => key !== 'No_connection_to_unit' && key !== 'status');
+      hasAlarms = activeAlarms.length > 0;
+      firstAlarmTimestamp = hasAlarms ? activeAlarms[0][1] : null;
+    }
 
-  let status = "Норма";
-  if (station.voltage === "БС недоступна" || isErrorState) {
-    status = "Недоступна";
-  } else if (hasAlarms) {
-    status = "Авария";
-  } else if (typeof station.voltage === 'number' && station.voltage < 47) {
-    status = "Низкое напряжение";
-  }
+    const duration = firstAlarmTimestamp ? calculateDuration(firstAlarmTimestamp) : "N/A";
 
-  return (
-    <div
-      key={station.name}
-      className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
-    >
-      <div>{station.name}</div>
-      <div className={`text-center ${
-        isErrorState ? "text-red-500" :
-        typeof station.voltage === 'number'
-          ? station.voltage < 47 
-            ? "text-red-500" 
-            : station.voltage < 50 
-              ? "text-yellow-500" 
-              : "text-green-500"
-          : "text-red-500"
-      }`}>
-        {isErrorState ? "Ошибка" : 
-         typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
+    let status = "Норма";
+    if (station.voltage === "БС недоступна" || isErrorState) {
+      status = "Недоступна";
+    } else if (hasAlarms) {
+      status = "Авария";
+    } else if (typeof station.voltage === 'number' && station.voltage < 47) {
+      status = "Низкое напряжение";
+    }
+
+    return (
+      <div
+        key={station.name}
+        className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+      >
+        <div>{station.name}</div>
+        <div className={`text-center ${isErrorState ? "text-red-500" :
+            typeof station.voltage === 'number'
+              ? station.voltage < 47
+                ? "text-red-500"
+                : station.voltage < 50
+                  ? "text-yellow-500"
+                  : "text-green-500"
+              : "text-red-500"
+          }`}>
+          {isErrorState ? "Ошибка" :
+            typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
+        </div>
+        <div className="text-left">
+          {isErrorState ? (
+            <div className="text-sm text-red-500">Ошибка получения данных</div>
+          ) : hasAlarms ? (
+            activeAlarms.map(([alarm, timestamp]) => (
+              <div key={alarm} className="text-sm text-red-500">
+                {alarm}: {formatTimestamp(timestamp)}
+              </div>
+            ))
+          ) : (
+            <span className="text-green-500">Нет аварий</span>
+          )}
+        </div>
+        <div>{duration}</div>
+        <div className={`text-center ${status === "Авария" ? "text-red-500" :
+            status === "Недоступна" ? "text-orange-500" :
+              status === "Низкое напряжение" ? "text-yellow-500" :
+                "text-green-500"
+          }`}>
+          {status}
+        </div>
+        <div>{station.priority}</div>
+        <div>{station.workEx}</div>
+        <div>{station.baseLocation}</div>
+        <div style={{ color: station.visit === "true" ? 'green' : 'red' }}>
+          {station.visit}
+        </div>
+        <div>{station.comment}</div>
       </div>
-      <div className="text-left">
-        {isErrorState ? (
-          <div className="text-sm text-red-500">Ошибка получения данных</div>
-        ) : hasAlarms ? (
-          activeAlarms.map(([alarm, timestamp]) => (
-            <div key={alarm} className="text-sm text-red-500">
-              {alarm}: {formatTimestamp(timestamp)}
-            </div>
-          ))
-        ) : (
-          <span className="text-green-500">Нет аварий</span>
-        )}
-      </div>
-      <div>{duration}</div>
-      <div className={`text-center ${
-        status === "Авария" ? "text-red-500" :
-        status === "Недоступна" ? "text-orange-500" :
-        status === "Низкое напряжение" ? "text-yellow-500" :
-        "text-green-500"
-      }`}>
-        {status}
-      </div>
-      <div>{station.priority}</div>
-      <div>{station.workEx}</div>
-      <div>{station.baseLocation}</div>
-      <div style={{ color: station.visit === "true" ? 'green' : 'red' }}>
-        {station.visit}
-      </div>
-      <div>{station.comment}</div>
-    </div>
-  );
-};
+    );
+  };
 
   const renderBaseStationTable = () => (
     <div className="mb-8 text-center">
@@ -519,18 +517,18 @@ const BsVoltage = () => {
         <SortableHeader label="Аварии" sortKey="alarms" sortConfig={sortConfig} onSort={requestSort} />
         <SortableHeader label="Длительность" sortKey="duration" sortConfig={sortConfig} onSort={requestSort} />
         <SortableHeader label="Напряжение" sortKey="voltage" sortConfig={sortConfig} onSort={requestSort} />
-        <SortableHeader 
-          label="Примерное время работы АКБ" 
-          sortKey="estimatedTime" 
-          sortConfig={sortConfig} 
-          onSort={requestSort} 
+        <SortableHeader
+          label="Примерное время работы АКБ"
+          sortKey="estimatedTime"
+          sortConfig={sortConfig}
+          onSort={requestSort}
         />
         <SortableHeader label="Статус" sortKey="status" sortConfig={sortConfig} onSort={requestSort} />
-        <SortableHeader 
-          label="Последнее обновление" 
-          sortKey="lastUpdated" 
-          sortConfig={sortConfig} 
-          onSort={requestSort} 
+        <SortableHeader
+          label="Последнее обновление"
+          sortKey="lastUpdated"
+          sortConfig={sortConfig}
+          onSort={requestSort}
         />
         <div className="flex items-center justify-center rounded cursor-pointer hover:opacity-70">
           Удалить
@@ -573,17 +571,15 @@ const BsVoltage = () => {
           })}
         </div>
         <div>{duration}</div>
-        <div className={`text-center ${
-          typeof bs.voltage === 'number'
+        <div className={`text-center ${typeof bs.voltage === 'number'
             ? bs.voltage < 50 ? "text-red-500" : "text-green-500"
             : "text-red-500"
-        }`}>
+          }`}>
           {typeof bs.voltage === 'number' ? `${bs.voltage} V` : bs.voltage}
         </div>
         <div>{bs.estimatedTime}</div>
-        <div className={`text-center ${
-          bs.status === "Accident" ? "text-red-500" : "text-green-500"
-        }`}>
+        <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"
+          }`}>
           {bs.status}
         </div>
         <div>{bs.lastUpdated}</div>
@@ -605,11 +601,11 @@ const BsVoltage = () => {
     );
   };
 
-  const SortableHeader = ({ 
-    label, 
-    sortKey, 
-    sortConfig, 
-    onSort 
+  const SortableHeader = ({
+    label,
+    sortKey,
+    sortConfig,
+    onSort
   }: {
     label: string;
     sortKey: string;
@@ -654,7 +650,7 @@ const BsVoltage = () => {
           )}
         </button>
       </div>
-      
+
       {renderExternalApiTable()}
 
       <div className="text-center">
@@ -668,17 +664,17 @@ const BsVoltage = () => {
             disabled={isLoading}
           />
           {isLoading ? (
-            <button 
-              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed" 
-              type="submit" 
+            <button
+              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+              type="submit"
               disabled
             >
               <LoadingSpinner />
               Загрузка ...
             </button>
           ) : (
-            <button 
-              className="px-4 py-2 text-white bg-blue-500 rounded-md cursor-pointer hover:bg-blue-600" 
+            <button
+              className="px-4 py-2 text-white bg-blue-500 rounded-md cursor-pointer hover:bg-blue-600"
               type="submit"
             >
               Добавить БС
@@ -691,24 +687,24 @@ const BsVoltage = () => {
 
           <div className="flex space-x-2">
             {isLoading ? (
-              <button 
-                className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed" 
+              <button
+                className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed"
                 disabled
               >
                 <LoadingSpinner />
                 Загрузка ...
               </button>
             ) : (
-              <button 
-                onClick={refreshData} 
+              <button
+                onClick={refreshData}
                 className="px-4 py-2 text-white bg-green-500 rounded-md cursor-pointer hover:bg-green-600"
               >
                 Обновить данные
               </button>
             )}
-          
+
             {bssList.length > 0 && (
-              <button 
+              <button
                 onClick={handleDeleteAllBs}
                 className="px-4 py-2 text-white bg-red-500 rounded-md cursor-pointer hover:bg-red-600"
               >
@@ -716,7 +712,7 @@ const BsVoltage = () => {
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <label htmlFor="refreshInterval" className="text-sm text-gray-700">
               Частота обновления:
