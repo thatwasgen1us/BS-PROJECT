@@ -629,6 +629,9 @@ const BsVoltage = () => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-semibold">Данные с внешнего API</h2>
+          <div>
+            Всего баз по питанию: {externalData ? externalData.length : 0}
+          </div>
           {lastExternalUpdate && (
             <p className="text-sm text-gray-500">
               Последнее обновление: {lastExternalUpdate}
