@@ -1,7 +1,6 @@
 import { format, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import React, { useEffect, useRef, useState } from 'react';
-  // @ts-ignore
 import Plot from 'react-plotly.js';
 import { useGetBseVoltageInfoQuery } from "../api/api";
 
@@ -42,10 +41,8 @@ const BsSchedule: React.FC = () => {
   const [bsNumber, setBsNumber] = useState<string>('NS0519');
   const [inputValue, setInputValue] = useState<string>(bsNumber);
   const [timeRange, setTimeRange] = useState<TimeRange>('24h');
-  // @ts-ignore
-  const [plotData, setPlotData] = useState<Partial<Plotly.PlotData>[]>([]);
-  // @ts-ignore
-  const [plotLayout, setPlotLayout] = useState<Partial<Plotly.Layout>>({});
+  const [plotData, setPlotData] = useState<any[]>([]);
+  const [plotLayout, setPlotLayout] = useState<any>({});
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>([]);
   const [markerText, setMarkerText] = useState<string>('');
   const [markerColor, setMarkerColor] = useState<string>('#FF5733');
@@ -65,21 +62,20 @@ const BsSchedule: React.FC = () => {
     if (plotRef.current) {
       const plotElement = plotRef.current.querySelector('.js-plotly-plot');
       if (plotElement) {
-        // @ts-ignore
-        Plotly.relayout(plotElement, {
+        (window as any).Plotly.relayout(plotElement, {
           'xaxis.range': null,
           'yaxis.range': [43, 55]
         });
       }
     }
   };
-  // @ts-ignore
-  const handlePlotClick = (data: Plotly.PlotMouseEvent) => {
+
+  const handlePlotClick = (data: any) => {
     if (data.points && data.points.length > 0) {
       const point = data.points[0];
       const newMarker: CustomMarker = {
-        x: new Date(point.x as string),
-        y: point.y as number,
+        x: new Date(point.x),
+        y: point.y,
         text: markerText || `Маркер ${customMarkers.length + 1}`,
         color: markerColor
       };
@@ -91,15 +87,15 @@ const BsSchedule: React.FC = () => {
     setCustomMarkers(customMarkers.filter((_, i) => i !== index));
   };
 
-  // Функция для фильтрации аварий - оставляем только события изменения состояния
   const getStatusChangeAlarms = (alarms: AlarmHistory[]): AlarmHistory[] => {
     const result: AlarmHistory[] = [];
     const lastStatus = new Map<string, string | null>();
 
     alarms
-      .filter(item => item.type)
-      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime())
-      .forEach(alarm => {
+      .filter((item: AlarmHistory) => item.type)
+      .sort((a: AlarmHistory, b: AlarmHistory) => 
+        new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime())
+      .forEach((alarm: AlarmHistory) => {
         const currentStatus = alarm.status;
         const last = lastStatus.get(alarm.type!);
 
@@ -122,32 +118,28 @@ const BsSchedule: React.FC = () => {
     const now = new Date();
     const startDate = timeRange === '24h' ? subDays(now, 1) : subDays(now, 7);
 
-    // Prepare voltage data
     const voltageData = (data.voltage_history || [])
-      .filter(item => new Date(item.measured_at) >= startDate)
-      .map(item => ({
+      .filter((item: VoltageHistory) => new Date(item.measured_at) >= startDate)
+      .map((item: VoltageHistory) => ({
         x: new Date(item.measured_at),
         y: Math.min(Math.max(item.value, 43), 55),
         status: item.status
       }))
-      .sort((a, b) => a.x.getTime() - b.x.getTime());
+      .sort((a: {x: Date}, b: {x: Date}) => a.x.getTime() - b.x.getTime());
 
-    // Получаем только аварии с изменением статуса
     const statusChangeAlarms = getStatusChangeAlarms(data.alarms_history || [])
-      .filter(item => new Date(item.recorded_at) >= startDate);
+      .filter((item: AlarmHistory) => new Date(item.recorded_at) >= startDate);
 
-    const alarmData = statusChangeAlarms.map(item => ({
+    const alarmData = statusChangeAlarms.map((item: AlarmHistory) => ({
       x: new Date(item.recorded_at),
       y: 45,
       type: item.type!,
       status: item.status,
-      // Добавляем иконку в зависимости от статуса
       symbol: item.status ? 'circle-x' : 'circle',
       size: item.status ? 16 : 12
     }));
 
-    // Prepare custom markers data
-    const markersData = customMarkers.map((marker, index) => ({
+    const markersData = customMarkers.map((marker: CustomMarker, index: number) => ({
       x: [marker.x],
       y: [marker.y],
       name: marker.text,
@@ -165,48 +157,49 @@ const BsSchedule: React.FC = () => {
       customdata: [index]
     }));
 
-    // @ts-ignore
-    const traces: Partial<Plotly.PlotData>[] = [
+    const traces = [
       {
-        x: voltageData.map(item => item.x),
-        y: voltageData.map(item => item.y),
+        x: voltageData.map((item: {x: Date}) => item.x),
+        y: voltageData.map((item: {y: number}) => item.y),
         name: 'Напряжение',
         mode: 'lines+markers',
         type: 'scatter',
         line: { color: '#10B981', width: 2 },
         marker: { size: 4 },
         hoverinfo: 'text',
-        hovertext: voltageData.map(item =>
+        hovertext: voltageData.map((item: {x: Date, y: number, status: string}) =>
           `Напряжение: ${item.y.toFixed(2)}V<br>` +
-          // @ts-ignore
-          `Время: ${format(item.x, 'PPpp', { locale: ru })}<br>` +
+          `Время: ${format(item.x, 'PPpp', 
+            // @ts-ignore
+            { locale: ru })}<br>` +
           `Статус: ${item.status || 'неизвестно'}`
         )
       },
       {
-        x: alarmData.map(item => item.x),
-        y: alarmData.map(item => item.y),
+        x: alarmData.map((item: {x: Date}) => item.x),
+        y: alarmData.map((item: {y: number}) => item.y),
         name: 'Аварии',
         mode: 'markers',
         type: 'scatter',
         marker: {
-          color: alarmData.map(item => getAlarmColor(item.type)),
-          size: alarmData.map(item => item.size),
-          symbol: alarmData.map(item => item.symbol),
+          color: alarmData.map((item: {type: string}) => getAlarmColor(item.type)),
+          size: alarmData.map((item: {size: number}) => item.size),
+          symbol: alarmData.map((item: {symbol: string}) => item.symbol),
           line: { color: 'white', width: 1 }
         },
         hoverinfo: 'text',
-        hovertext: alarmData.map(item =>
+        hovertext: alarmData.map((item: {x: Date, type: string, status: string | null}) =>
           `${item.status ? 'Появление аварии' : 'Исчезновение аварии'}: ${item.type}<br>` +
-          // @ts-ignore
-          `Время: ${format(item.x, 'PPpp', { locale: ru })}<br>` +
+          `Время: ${format(item.x, 'PPpp', 
+            // @ts-ignore
+            { locale: ru })}<br>` +
           `Статус: ${item.status || 'неизвестно'}`
         )
       },
       ...markersData
     ];
-    // @ts-ignore
-    const layout: Partial<Plotly.Layout> = {
+
+    const layout = {
       title: {
         text: `Мониторинг БС ${data.station_info.bs_id}`,
         font: {
@@ -262,7 +255,7 @@ const BsSchedule: React.FC = () => {
     <div className="p-6 mt-16 bg-white rounded-lg shadow-md">
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
         <h2 className="text-xl font-semibold">Мониторинг напряжения БС</h2>
-
+        
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
@@ -281,8 +274,8 @@ const BsSchedule: React.FC = () => {
             <option value="24h">24 часа</option>
             <option value="7d">7 дней</option>
           </select>
-          <button
-            type="submit"
+          <button 
+            type="submit" 
             className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
             disabled={isFetching}
           >
@@ -361,10 +354,9 @@ const BsSchedule: React.FC = () => {
                     {marker.text}
                   </div>
                   <div className="text-sm text-gray-600">
-                    // @ts-ignore
-                    {format(marker.x, 'PPpp',
-                    // @ts-ignore
-                       { locale: ru })}
+                    {format(marker.x, 'PPpp', 
+                      // @ts-ignore
+                      { locale: ru })}
                   </div>
                   <div className="text-sm">
                     Напряжение: {marker.y.toFixed(2)}V
