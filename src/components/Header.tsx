@@ -19,6 +19,12 @@ const Header = () => {
           >
             Напряжение на БС
           </Link>
+          <Link
+            to={"/bs-voltage-schedule"}
+            className="transition-all hover:text-blue-300"
+          >
+            График напряжения БС
+          </Link>
         </nav>
       </div>
     </header>
