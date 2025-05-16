@@ -400,16 +400,14 @@ const BsVoltage = () => {
     return sortableItems;
   }, [externalStations, externalSortConfig]);
 
-  // Компоненты для рендеринга
   const renderExternalApiTable = () => (
     <div className="mb-4 text-center">
-      <div className="grid grid-cols-11 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
+      <div className="grid grid-cols-10 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
         <SortableHeader label="БС" sortKey="name" sortConfig={externalSortConfig} onSort={requestExternalSort} />
         <SortableHeader label="Напряжение" sortKey="voltage" sortConfig={externalSortConfig} onSort={requestExternalSort} />
         <div className="flex items-center justify-center">Авария</div>
         <SortableHeader label="Длительность" sortKey="duration" sortConfig={externalSortConfig} onSort={requestExternalSort} />
         <div className="flex items-center justify-center">Статус</div>
-        <div className="flex items-center justify-center">Последнее обновление</div>
         <SortableHeader label="Приоритет" sortKey="priority" sortConfig={externalSortConfig} onSort={requestExternalSort} />
         <div className="flex items-center justify-center">Выдача задания</div>
         <div className="flex items-center justify-center">Локация</div>
@@ -465,7 +463,7 @@ const BsVoltage = () => {
   return (
     <div
       key={station.name}
-      className="grid grid-cols-11 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+      className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
     >
       <div>{station.name}</div>
       <div className={`text-center ${
@@ -502,9 +500,6 @@ const BsVoltage = () => {
         "text-green-500"
       }`}>
         {status}
-      </div>
-      <div>
-        {station.lastUpdated ? formatTimestamp(station.lastUpdated) : 'N/A'}
       </div>
       <div>{station.priority}</div>
       <div>{station.workEx}</div>
