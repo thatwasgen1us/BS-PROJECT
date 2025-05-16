@@ -3,6 +3,7 @@ import Home from "@/pages/Home";
 import BsVoltage from "@/pages/BsVoltage";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/utils/ThemeContext";
+import BsSchedule from "./pages/bsSchedule";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/base/:stationId" element={<Home />} />
             <Route path="/bs-voltage" element={<BsVoltage />} />
+            <Route path="/bs-voltage-schedule" element={<BsSchedule />} />
           </Routes>
         </BrowserRouter>
       </div>
