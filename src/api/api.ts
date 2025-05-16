@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { StationDataVoltage } from "../pages/bsSchedule";
+import { StationDataVoltage } from "../pages/BsSchedule";
 
 export interface StationData {
   BS_NAME: string;
