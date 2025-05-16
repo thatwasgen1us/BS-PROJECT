@@ -3,7 +3,7 @@ import Home from "@/pages/Home";
 import BsVoltage from "@/pages/BsVoltage";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/utils/ThemeContext";
-import BsSchedule from "./pages/bsSchedule";
+import BsSchedule from "./pages/BsSchedule";
 
 function App() {
   return (
