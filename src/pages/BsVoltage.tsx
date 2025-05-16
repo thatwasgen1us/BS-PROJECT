@@ -446,6 +446,7 @@ const BsVoltage = () => {
       activeAlarms = Object.entries(station.alarms)
         .filter(([key]) => key !== 'No_connection_to_unit' && key !== 'status');
       hasAlarms = activeAlarms.length > 0;
+      // @ts-ignore
       firstAlarmTimestamp = hasAlarms ? activeAlarms[0][1] : null;
     }
 
