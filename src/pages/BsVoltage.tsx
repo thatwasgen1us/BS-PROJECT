@@ -438,18 +438,24 @@ const BsVoltage = () => {
   );
 
   const renderExternalStationRow = (station: ExternalApiStation) => {
-    const isErrorState = station.voltage === "Ошибка";
-    const powerAlarmTimestamp = station.alarms?.POWER; // Только POWER для длительности
-    const hasPowerAlarm = !!powerAlarmTimestamp;
+    const isErrorState = station.voltage === "Ошибка" || station.voltage === "БС недоступна";
+  
+  // Обрабатываем случай, когда alarms - это строка "БС недоступна"
+  const alarms = typeof station.alarms === 'string' 
+    ? {} 
+    : station.alarms || {};
+  
+  const powerAlarmTimestamp = alarms.POWER; // Только POWER для длительности
+  const hasPowerAlarm = !!powerAlarmTimestamp;
 
   // Все аварии для отображения (кроме No_connection_to_unit и status)
-  const activeAlarms = Object.entries(station.alarms || {})
+  const activeAlarms = Object.entries(alarms)
     .filter(([key]) => !['No_connection_to_unit', 'status'].includes(key));
 
   let status = "Норма";
   if (station.voltage === "БС недоступна" || isErrorState) {
     status = "Недоступна";
-  } else if (activeAlarms.length > 0) { // Проверяем любые аварии для статуса
+  } else if (activeAlarms.length > 0) {
     status = "Авария";
   } else if (typeof station.voltage === 'number' && station.voltage < 47) {
     status = "Низкое напряжение";
