@@ -76,23 +76,28 @@ const formatTimestamp = (timestamp: string): string => {
 const calculateDuration = (timestamp: string): string => {
   if (!timestamp || timestamp === "БС недоступна") return "N/A";
 
-  const year = parseInt(timestamp.slice(0, 4)),
-    month = parseInt(timestamp.slice(4, 6)) - 1,
-    day = parseInt(timestamp.slice(6, 8)),
-    hours = parseInt(timestamp.slice(8, 10)),
-    minutes = parseInt(timestamp.slice(10, 12)),
-    seconds = parseInt(timestamp.slice(12, 14)),
-    milliseconds = parseInt(timestamp.slice(15, 18));
+  try {
+    const year = parseInt(timestamp.slice(0, 4)),
+      month = parseInt(timestamp.slice(4, 6)) - 1,
+      day = parseInt(timestamp.slice(6, 8)),
+      hours = parseInt(timestamp.slice(8, 10)),
+      minutes = parseInt(timestamp.slice(10, 12)),
+      seconds = parseInt(timestamp.slice(12, 14)),
+      milliseconds = parseInt(timestamp.slice(15, 18));
 
-  const alarmDate = new Date(year, month, day, hours, minutes, seconds, milliseconds);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - alarmDate.getTime()) / 1000);
+    const alarmDate = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - alarmDate.getTime()) / 1000);
 
-  const hoursDiff = Math.floor(diffInSeconds / 3600);
-  const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
-  const secondsDiff = diffInSeconds % 60;
+    const hoursDiff = Math.floor(diffInSeconds / 3600);
+    const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
+    const secondsDiff = diffInSeconds % 60;
 
-  return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
+    return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
+  } catch (error) {
+    console.error('Error calculating duration', timestamp);
+    return 'N/A';
+  }
 };
 
 // Компоненты
@@ -433,83 +438,83 @@ const BsVoltage = () => {
   );
 
   const renderExternalStationRow = (station: ExternalApiStation) => {
-    const isErrorState = station.voltage === "Ошибка";
+  const isErrorState = station.voltage === "Ошибка";
 
-    let activeAlarms: [string, string][] = [];
-    let hasAlarms = false;
-    let firstAlarmTimestamp = null;
+  let activeAlarms: [string, string][] = [];
+  let hasAlarms = false;
+  let powerAlarmTimestamp: string | null = null;
 
-    if (isErrorState) {
-      hasAlarms = true;
-    } else if (typeof station.alarms === 'object' && station.alarms !== null) {
-      // Нормальный случай - alarms это объект
-      activeAlarms = Object.entries(station.alarms)
-        .filter(([key]) => key !== 'No_connection_to_unit' && key !== 'status');
-      hasAlarms = activeAlarms.length > 0;
-      // @ts-ignore
-      firstAlarmTimestamp = hasAlarms ? activeAlarms[0][1] : null;
-    }
+  if (isErrorState) {
+    hasAlarms = true;
+  } else if (typeof station.alarms === 'object' && station.alarms !== null) {
+    // Фильтруем только аварии POWER
+    activeAlarms = Object.entries(station.alarms)
+      .filter(([key]) => key === 'POWER');
+    hasAlarms = activeAlarms.length > 0;
+    powerAlarmTimestamp = station.alarms.POWER;
+  }
 
-    const duration = firstAlarmTimestamp ? calculateDuration(firstAlarmTimestamp) : "N/A";
+  const duration = powerAlarmTimestamp ? calculateDuration(powerAlarmTimestamp) : "N/A";
 
-    let status = "Норма";
-    if (station.voltage === "БС недоступна" || isErrorState) {
-      status = "Недоступна";
-    } else if (hasAlarms) {
-      status = "Авария";
-    } else if (typeof station.voltage === 'number' && station.voltage < 47) {
-      status = "Низкое напряжение";
-    }
+  let status = "Норма";
+  if (station.voltage === "БС недоступна" || isErrorState) {
+    status = "Недоступна";
+  } else if (hasAlarms) {
+    status = "Авария";
+  } else if (typeof station.voltage === 'number' && station.voltage < 47) {
+    status = "Низкое напряжение";
+  }
 
-    return (
-      <div
-        key={station.name}
-        className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
-      >
-        <div>{station.name}</div>
-        <div className={`text-center ${isErrorState ? "text-red-500" :
-            typeof station.voltage === 'number'
-              ? station.voltage < 47
-                ? "text-red-500"
-                : station.voltage < 50
-                  ? "text-yellow-500"
-                  : "text-green-500"
-              : "text-red-500"
-          }`}>
-          {isErrorState ? "Ошибка" :
-            typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
-        </div>
-        <div className="text-left">
-          {isErrorState ? (
-            <div className="text-sm text-red-500">Ошибка получения данных</div>
-          ) : hasAlarms ? (
-            activeAlarms.map(([alarm, timestamp]) => (
-              <div key={alarm} className="text-sm text-red-500">
-                {alarm}: {formatTimestamp(timestamp)}
-              </div>
-            ))
-          ) : (
-            <span className="text-green-500">Нет аварий</span>
-          )}
-        </div>
-        <div>{duration}</div>
-        <div className={`text-center ${status === "Авария" ? "text-red-500" :
-            status === "Недоступна" ? "text-orange-500" :
-              status === "Низкое напряжение" ? "text-yellow-500" :
-                "text-green-500"
-          }`}>
-          {status}
-        </div>
-        <div>{station.priority}</div>
-        <div>{station.workEx}</div>
-        <div>{station.baseLocation}</div>
-        <div style={{ color: station.visit === "true" ? 'green' : 'red' }}>
-          {station.visit}
-        </div>
-        <div>{station.comment}</div>
+  return (
+    <div
+      key={station.name}
+      className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+    >
+      {/* Остальные колонки остаются без изменений */}
+      <div>{station.name}</div>
+      <div className={`text-center ${isErrorState ? "text-red-500" :
+          typeof station.voltage === 'number'
+            ? station.voltage < 47
+              ? "text-red-500"
+              : station.voltage < 50
+                ? "text-yellow-500"
+                : "text-green-500"
+            : "text-red-500"
+        }`}>
+        {isErrorState ? "Ошибка" :
+          typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
       </div>
-    );
-  };
+      <div className="text-left">
+        {isErrorState ? (
+          <div className="text-sm text-red-500">Ошибка получения данных</div>
+        ) : hasAlarms ? (
+          activeAlarms.map(([alarm, timestamp]) => (
+            <div key={alarm} className="text-sm text-red-500">
+              {alarm}: {formatTimestamp(timestamp)}
+            </div>
+          ))
+        ) : (
+          <span className="text-green-500">Нет аварий</span>
+        )}
+      </div>
+      <div>{duration}</div>
+      <div className={`text-center ${status === "Авария" ? "text-red-500" :
+          status === "Недоступна" ? "text-orange-500" :
+            status === "Низкое напряжение" ? "text-yellow-500" :
+              "text-green-500"
+        }`}>
+        {status}
+      </div>
+      <div>{station.priority}</div>
+      <div>{station.workEx}</div>
+      <div>{station.baseLocation}</div>
+      <div style={{ color: station.visit === "true" ? 'green' : 'red' }}>
+        {station.visit}
+      </div>
+      <div>{station.comment}</div>
+    </div>
+  );
+};
 
   const renderBaseStationTable = () => (
     <div className="mb-8 text-center">
@@ -549,58 +554,59 @@ const BsVoltage = () => {
   );
 
   const renderBaseStationRow = (bs: BaseStation) => {
-    const hasPowerAlarm = !!bs.alarms?.POWER;
-    const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
+  const powerAlarmTimestamp = bs.alarms?.POWER;
+  const duration = powerAlarmTimestamp ? calculateDuration(powerAlarmTimestamp) : "N/A";
 
-    return (
-      <div
-        key={bs.name}
-        className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
-      >
-        <div>{bs.name}</div>
-        <div>
-          {ALLOWED_ALARMS.map((alarm) => {
-            const timestamp = bs.alarms?.[alarm];
-            if (timestamp) {
-              return (
-                <div key={alarm} className="text-sm text-left text-red-500">
-                  {alarm}: {formatTimestamp(timestamp)}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-        <div>{duration}</div>
-        <div className={`text-center ${typeof bs.voltage === 'number'
-            ? bs.voltage < 50 ? "text-red-500" : "text-green-500"
-            : "text-red-500"
-          }`}>
-          {typeof bs.voltage === 'number' ? `${bs.voltage} V` : bs.voltage}
-        </div>
-        <div>{bs.estimatedTime}</div>
-        <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"
-          }`}>
-          {bs.status}
-        </div>
-        <div>{bs.lastUpdated}</div>
-        <div>
-          <button
-            onClick={() => handleDeleteBs(bs.name)}
-            className="text-red-500 hover:text-red-700"
-          >
-            <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
-              <path
-                fillRule="evenodd"
-                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </TrashIcon>
-          </button>
-        </div>
+  return (
+    <div
+      key={bs.name}
+      className="grid grid-cols-8 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
+    >
+      {/* Остальные колонки остаются без изменений */}
+      <div>{bs.name}</div>
+      <div>
+        {ALLOWED_ALARMS.map((alarm) => {
+          const timestamp = bs.alarms?.[alarm];
+          if (timestamp) {
+            return (
+              <div key={alarm} className="text-sm text-left text-red-500">
+                {alarm}: {formatTimestamp(timestamp)}
+              </div>
+            );
+          }
+          return null;
+        })}
       </div>
-    );
-  };
+      <div>{duration}</div>
+      <div className={`text-center ${typeof bs.voltage === 'number'
+          ? bs.voltage < 50 ? "text-red-500" : "text-green-500"
+          : "text-red-500"
+        }`}>
+        {typeof bs.voltage === 'number' ? `${bs.voltage} V` : bs.voltage}
+      </div>
+      <div>{bs.estimatedTime}</div>
+      <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"
+        }`}>
+        {bs.status}
+      </div>
+      <div>{bs.lastUpdated}</div>
+      <div>
+        <button
+          onClick={() => handleDeleteBs(bs.name)}
+          className="text-red-500 hover:text-red-700"
+        >
+          <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
+            <path
+              fillRule="evenodd"
+              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </TrashIcon>
+        </button>
+      </div>
+    </div>
+  );
+};
 
   const SortableHeader = ({
     label,
