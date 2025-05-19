@@ -439,32 +439,21 @@ const BsVoltage = () => {
 
   const renderExternalStationRow = (station: ExternalApiStation) => {
     const isErrorState = station.voltage === "Ошибка";
+    const powerAlarmTimestamp = station.alarms?.POWER; // Только POWER для длительности
+    const hasPowerAlarm = !!powerAlarmTimestamp;
 
-    let activeAlarms: [string, string][] = [];
-    let hasAlarms = false;
-    let firstAlarmTimestamp = null;
+  // Все аварии для отображения (кроме No_connection_to_unit и status)
+  const activeAlarms = Object.entries(station.alarms || {})
+    .filter(([key]) => !['No_connection_to_unit', 'status'].includes(key));
 
-    if (isErrorState) {
-      hasAlarms = true;
-    } else if (typeof station.alarms === 'object' && station.alarms !== null) {
-      activeAlarms = Object.entries(station.alarms)
-        .filter(([key]) => key !== 'No_connection_to_unit' && key !== 'status');
-      hasAlarms = activeAlarms.length > 0;
-      // @ts-ignore
-      firstAlarmTimestamp = hasAlarms ? activeAlarms[0][1] : null;
-    }
-
-    const duration = firstAlarmTimestamp ? calculateDuration(firstAlarmTimestamp) : "N/A";
-
-    let status = "Норма";
-    if (station.voltage === "БС недоступна" || isErrorState) {
-      status = "Недоступна";
-    } else if (hasAlarms) {
-      status = "Авария";
-    } else if (typeof station.voltage === 'number' && station.voltage < 47) {
-      status = "Низкое напряжение";
-    }
-
+  let status = "Норма";
+  if (station.voltage === "БС недоступна" || isErrorState) {
+    status = "Недоступна";
+  } else if (activeAlarms.length > 0) { // Проверяем любые аварии для статуса
+    status = "Авария";
+  } else if (typeof station.voltage === 'number' && station.voltage < 47) {
+    status = "Низкое напряжение";
+  }
     return (
       <div
         key={station.name}
@@ -483,20 +472,22 @@ const BsVoltage = () => {
           {isErrorState ? "Ошибка" :
             typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
         </div>
-        <div className="text-left">
+        <div className="text-left break-words">
           {isErrorState ? (
-            <div className="text-sm text-red-500">Ошибка получения данных</div>
-          ) : hasAlarms ? (
-            activeAlarms.map(([alarm, timestamp]) => (
-              <div key={alarm} className="text-sm text-red-500">
-                {alarm}: {formatTimestamp(timestamp)}
-              </div>
-            ))
-          ) : (
-            <span className="text-green-500">Нет аварий</span>
-          )}
+          <div className="text-sm text-red-500">Ошибка получения данных</div>
+        ) : activeAlarms.length > 0 ? (
+          activeAlarms.map(([alarm, timestamp]) => (
+            <div key={alarm} className="text-sm text-red-500">
+              {alarm}: {formatTimestamp(timestamp)}
+            </div>
+          ))
+        ) : (
+          <span className="text-green-500">Нет аварий</span>
+        )}
         </div>
-        <div>{duration}</div>
+        <div>
+          {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
+        </div>
         <div className={`text-center ${status === "Авария" ? "text-red-500" :
             status === "Недоступна" ? "text-orange-500" :
               status === "Низкое напряжение" ? "text-yellow-500" :
@@ -553,8 +544,8 @@ const BsVoltage = () => {
   );
 
   const renderBaseStationRow = (bs: BaseStation) => {
-    const hasPowerAlarm = !!bs.alarms?.POWER;
-    const duration = hasPowerAlarm ? calculateDuration(bs.alarms.POWER!) : "N/A";
+    const powerAlarmTimestamp = bs.alarms?.POWER; // Только для длительности
+    const hasPowerAlarm = !!powerAlarmTimestamp;
 
     return (
       <div
@@ -564,18 +555,20 @@ const BsVoltage = () => {
         <div>{bs.name}</div>
         <div>
           {ALLOWED_ALARMS.map((alarm) => {
-            const timestamp = bs.alarms?.[alarm];
-            if (timestamp) {
-              return (
-                <div key={alarm} className="text-sm text-left text-red-500">
-                  {alarm}: {formatTimestamp(timestamp)}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-        <div>{duration}</div>
+          const timestamp = bs.alarms?.[alarm];
+          if (timestamp) {
+            return (
+              <div key={alarm} className="text-sm text-left text-red-500">
+                {alarm}: {formatTimestamp(timestamp)}
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+      <div>
+        {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
+      </div>
         <div className={`text-center ${typeof bs.voltage === 'number'
             ? bs.voltage < 50 ? "text-red-500" : "text-green-500"
             : "text-red-500"
