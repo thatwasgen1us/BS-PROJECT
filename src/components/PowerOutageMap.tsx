@@ -32,25 +32,26 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
   };
 
   const renderAlarmsInfo = (alarms: Record<string, string> | string) => {
-    if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
-    if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
-    
-    return (
-      <div>
-        <p>Активные аварии:</p>
-        <ul>
-          {Object.entries(alarms).map(([type, time]) => (
-            <li key={type}>{type}: {new Date(time).toLocaleString()}</li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
+  if (!alarms) return <p>Нет данных о тревогах</p>; // Добавлена проверка на null или undefined
+  if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
+  if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
+  
+  return (
+    <div>
+      <p>Активные аварии:</p>
+      <ul>
+        {Object.entries(alarms).map(([type, time]) => (
+          <li key={type}>{type}: {new Date(time).toLocaleString()}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
   const stationsWithCoords = stations.filter(s => s.coordinates);
 
   return (
-    <div style={{ height: '85vh', width: '100%', position: 'relative' }}>
+    <div style={{ height: '78vh', width: '100%', position: 'relative' }}>
       {stationsWithCoords.length > 0 ? (
         <MapContainer 
           center={[54.9833, 82.8963]} // Центр на Новосибирск
