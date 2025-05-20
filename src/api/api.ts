@@ -98,8 +98,5 @@ export const {
   useLazyGetBaseVoltageQuery,
   useGetLastDataFromExternalApiQuery,
   useGetBseVoltageInfoQuery
-<<<<<<< HEAD
+
 } = Api;
-=======
-} = Api;
->>>>>>> 4a0b5d78e61e121a384860855589f08cb2ce3c8e

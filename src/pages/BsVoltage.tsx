@@ -752,8 +752,4 @@ const BsVoltage = () => {
   );
 };
 
-<<<<<<< HEAD
 export default React.memo(BsVoltage);
-=======
-export default React.memo(BsVoltage);
->>>>>>> 4a0b5d78e61e121a384860855589f08cb2ce3c8e
