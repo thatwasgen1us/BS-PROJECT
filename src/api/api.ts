@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { StationDataVoltage } from "../pages/BsSchedule";
 
 export interface StationData {
   BS_NAME: string;
@@ -6,18 +7,16 @@ export interface StationData {
   CA_52w: number;
 }
 
-export interface DataResponse {
-  data: StationData[];
-}
+export type DataResponse = StationData[];
 
 export interface Comment {
   comment: string;
   date: string;
   site_name: string;
   status: string;
-  type_failure: null | string
-  type_: string | null; 
-  type_a: string | null; 
+  type_failure: null | string;
+  type_: string | null;
+  type_a: string | null;
 }
 
 export interface WeekData {
@@ -34,8 +33,31 @@ export interface SiteInfo {
   comment: null | Comment[];
   site_info: WeekData[];
 }
+
+type VoltageValue = number | string;
+
+interface VoltageData {
+  [baseStation: string]: VoltageValue;
+}
+
+interface AlarmStatus {
+  status?: string;
+  [alarmType: string]: string | undefined;
+}
+
+interface AlarmsData {
+  [baseStation: string]: AlarmStatus;
+}
+
+interface ApiResponseItem {
+  voltage?: VoltageData;
+  alarms?: AlarmsData;
+}
+
+export type ExternalApiResponse = ApiResponseItem[];
 export const Api = createApi({
   reducerPath: "api",
+  // Основной базовый URL
   baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.213:430/" }),
   endpoints: (builder) => ({
     getBaseData: builder.query<DataResponse | undefined, void>({
@@ -47,11 +69,33 @@ export const Api = createApi({
     addComment: builder.mutation<void, { base: string; comment: Comment }>({
       query: ({ base, comment }) => ({
         url: `site_info/${base}`,
-        method: 'POST',
+        method: "POST",
         body: comment,
+      }),
+    }),
+    getBaseVoltage: builder.query({
+      query: (base) => `voltage/${base}`
+    }),
+    getLastDataFromExternalApi: builder.query<ExternalApiResponse, void>({
+      query: () => ({
+        url: "https://10.77.28.213:5000/api/last_data",
+        baseUrl: ""
+      }),
+    }),
+     getBseVoltageInfo: builder.query<StationDataVoltage| null, string>({
+      query: (base) => ({
+        url: `https://10.77.28.213:430/graf_voltage/${base}`,
+        baseUrl: ""
       }),
     }),
   }),
 });
 
-export const { useGetBaseDataQuery, useGetBaseInfoQuery, useAddCommentMutation } = Api;
+export const {
+  useGetBaseDataQuery,
+  useGetBaseInfoQuery,
+  useAddCommentMutation,
+  useLazyGetBaseVoltageQuery,
+  useGetLastDataFromExternalApiQuery,
+  useGetBseVoltageInfoQuery
+} = Api;

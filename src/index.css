@@ -26,6 +26,7 @@ body {
   }
 }
 
+
 :root {
   --background: #f8fafc;
   --text: #1e293b;
@@ -41,11 +42,19 @@ body {
   --link: #60a5fa;
   --accent: #1d4ed8;
 }
-.scrollbar-none::-webkit-scrollbar {
+/* .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+} */
+
+header {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  z-index: 1000; 
 }

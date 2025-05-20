@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { SiteInfo, WeekData } from "@/api/api";
+import { Link, useNavigate } from "react-router-dom";
 
 interface ScheduleProps {
   data: SiteInfo | null | undefined;
@@ -7,11 +8,12 @@ interface ScheduleProps {
 
 const Schedule: React.FC<ScheduleProps> = ({ data }) => {
   const dataObj = data?.site_info;
+  const navigate = useNavigate();
 
   const hasData = Array.isArray(dataObj) && dataObj.length > 0;
 
   const limitedData = useMemo(
-    () => (hasData ? dataObj.slice(0, 52) : []),
+    () => (hasData ? dataObj.slice(-52) : []),
     [dataObj, hasData]
   );
 
@@ -65,6 +67,25 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
     setHoveredKey(null);
   }, []);
 
+  const handleAnchorClick = useCallback(
+    (event: React.MouseEvent, item: WeekData & { CA_2G: string | number }) => {
+      event.preventDefault(); 
+  
+      navigate(`#${item.weak}`, { replace: true });
+  
+      setTimeout(() => {
+        const element = document.getElementById(item.weak);
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center', // Прокручивает элемент к центру экрана
+          });
+        }
+      }, 100);
+    },
+    [navigate] 
+  );
+
   return (
     <div className="table-container">
       <div className="table">
@@ -76,17 +97,19 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                   ? Number(item.weak.slice(-2))
                   : null;
                 return (
-                  <div
+                  <Link
+                    to={`#${item.weak}`} 
                     key={item.weak}
-                    className="flex items-center justify-center w-8 h-8 p-2 border border-gray-300 rounded cursor-default hover:scale-105"
+                    className="flex items-center justify-center w-8 h-8 p-2 duration-75 border border-gray-300 rounded cursor-default du hover:scale-105"
                     style={{ backgroundColor: getColor(item.CA_2G) }}
                     onMouseEnter={(e) => handleMouseEnter(item, e)}
                     onMouseLeave={handleMouseLeave}
+                    onClick={(e) => handleAnchorClick(e, item)}
                   >
                     {weakValue !== null && weakValue > 17 && weakValue < 43 && (
                       <span>☀</span>
                     )}
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -95,7 +118,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
           <div>No data available</div>
         )}
       </div>
-
+  
       {tooltip.visible && (
         <div
           className="fixed z-50 p-2 bg-white border border-black rounded shadow-lg tooltip"
