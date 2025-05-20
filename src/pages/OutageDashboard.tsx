@@ -1,4 +1,5 @@
 import { ExternalApiResponse, useGetLastDataFromExternalApiQuery } from '../api/api';
+import { Spinner } from '../components';
 import PowerOutageMap from '../components/PowerOutageMap';
 
 export interface TransformedStation {
@@ -50,7 +51,7 @@ const OutageDashboard = () => {
   // Станции без координат
   const stationsWithoutCoords = stations.filter(s => !s.coordinates);
 
-  if (isLoading) return <div className='flex items-center justify-center text-5xl text-text h-[100vh]'>Загрузка...</div>;
+  if (isLoading) return <div className='flex items-center justify-center text-5xl text-text h-[100vh]'><Spinner/></div>;
 
   return (
     <div style={{ padding: '20px', marginTop: '40px' }}>
