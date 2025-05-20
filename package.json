@@ -14,7 +14,6 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/postcss": "^4.0.12",
     "@tailwindcss/vite": "^4.0.12",
-    "@types/date-fns": "^2.5.3",
     "autoprefixer": "^10.4.20",
     "chart.js": "^4.4.9",
     "chartjs-adapter-date-fns": "^3.0.0",
@@ -35,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/date-fns": "^2.6.3",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -49,11 +49,6 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "latest",
-    "@esbuild/linux-x64": "latest",
-    "@tailwindcss/oxide-linux-x64-gnu": "latest"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,css,scss,json,md}": [
