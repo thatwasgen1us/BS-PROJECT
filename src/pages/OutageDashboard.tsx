@@ -17,9 +17,19 @@ export interface TransformedStation {
 }
 
 export const transformStationData = (data: ExternalApiResponse): TransformedStation[] => {
+  if (!data) return [];
+  
   return data.flatMap(item => {
     const stationKey = Object.keys(item)[0];
     const stationData = item[stationKey];
+
+    // Проверяем, что координаты существуют и их можно преобразовать в число
+    const latitude = stationData.latitude && !isNaN(parseFloat(stationData.latitude)) 
+      ? parseFloat(stationData.latitude) 
+      : null;
+    const longitude = stationData.longitude && !isNaN(parseFloat(stationData.longitude)) 
+      ? parseFloat(stationData.longitude) 
+      : null;
 
     return {
       id: stationKey,
@@ -27,9 +37,7 @@ export const transformStationData = (data: ExternalApiResponse): TransformedStat
       location: stationData.Location,
       voltage: stationData.voltage === "БС недоступна" ? null : parseFloat(stationData.voltage || '0'),
       alarms: stationData.alarms,
-      coordinates: stationData.latitude && stationData.longitude
-        ? [parseFloat(stationData.latitude), parseFloat(stationData.longitude)]
-        : null,
+      coordinates: latitude && longitude ? [latitude, longitude] : null,
       last_update: stationData.Время_аварии,
       priority: stationData.Приоритет,
       work_order: stationData.Наряд_на_работы,
@@ -45,9 +53,9 @@ const OutageDashboard = () => {
   // Преобразуем данные при получении
   const stations = rawStations ? transformStationData(rawStations) : [];
 
-  // Фильтруем станции без питания
-  const outageStations = stations.filter(s => s.voltage === 0 || s.voltage === null);
-
+  // Станции с координатами
+  const stationsWithCoords = stations.filter(s => s.coordinates);
+  
   // Станции без координат
   const stationsWithoutCoords = stations.filter(s => !s.coordinates);
 
@@ -55,16 +63,16 @@ const OutageDashboard = () => {
 
   return (
     <div style={{ padding: '20px', marginTop: '40px' }}>
-      <h1 className='text-text'>Базы с отключенным питанием</h1>
+      <h1 className='text-text'>Мониторинг базовых станций</h1>
 
       <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
         <div className="status-box">
           <h3>Всего баз</h3>
           <p>{stations.length}</p>
         </div>
-        <div className="status-box" style={{ backgroundColor: '#ffebee' }}>
-          <h3>Без питания</h3>
-          <p>{outageStations.length}</p>
+        <div className="status-box">
+          <h3>С координатами</h3>
+          <p>{stationsWithCoords.length}</p>
         </div>
         <div className="status-box" style={{ backgroundColor: '#fff8e1' }}>
           <h3>Без координат</h3>
@@ -72,7 +80,7 @@ const OutageDashboard = () => {
         </div>
       </div>
 
-      <PowerOutageMap stations={outageStations} />
+      <PowerOutageMap stations={stations} />
 
       {stationsWithoutCoords.length > 0 && (
         <div style={{ marginTop: '30px' }}>
