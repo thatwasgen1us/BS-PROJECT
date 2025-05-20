@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ExternalApiResponse, useGetLastDataFromExternalApiQuery } from '../api/api';
 import { Spinner } from '../components';
 import PowerOutageMap from '../components/PowerOutageMap';
@@ -18,17 +19,16 @@ export interface TransformedStation {
 
 export const transformStationData = (data: ExternalApiResponse): TransformedStation[] => {
   if (!data) return [];
-  
+
   return data.flatMap(item => {
     const stationKey = Object.keys(item)[0];
     const stationData = item[stationKey];
 
-    // Проверяем, что координаты существуют и их можно преобразовать в число
-    const latitude = stationData.latitude && !isNaN(parseFloat(stationData.latitude)) 
-      ? parseFloat(stationData.latitude) 
+    const latitude = stationData.latitude && !isNaN(parseFloat(stationData.latitude))
+      ? parseFloat(stationData.latitude)
       : null;
-    const longitude = stationData.longitude && !isNaN(parseFloat(stationData.longitude)) 
-      ? parseFloat(stationData.longitude) 
+    const longitude = stationData.longitude && !isNaN(parseFloat(stationData.longitude))
+      ? parseFloat(stationData.longitude)
       : null;
 
     return {
@@ -48,22 +48,32 @@ export const transformStationData = (data: ExternalApiResponse): TransformedStat
 };
 
 const OutageDashboard = () => {
-  const { data: rawStations, isLoading } = useGetLastDataFromExternalApiQuery();
+  const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
+  const { data: rawStations, isLoading } = useGetLastDataFromExternalApiQuery(undefined, {
+    pollingInterval: 30000, // 30 секунд
+    refetchOnMountOrArgChange: true
+  });
 
   // Преобразуем данные при получении
   const stations = rawStations ? transformStationData(rawStations) : [];
-
-  // Станции с координатами
   const stationsWithCoords = stations.filter(s => s.coordinates);
-  
-  // Станции без координат
   const stationsWithoutCoords = stations.filter(s => !s.coordinates);
 
-  if (isLoading) return <div className='flex items-center justify-center text-5xl text-text h-[100vh]'><Spinner/></div>;
+  // Эффект для обновления времени последнего обновления
+  useEffect(() => {
+    setLastUpdated(new Date().toLocaleTimeString());
+  }, [rawStations]);
+
+  if (isLoading) return <div className='flex items-center justify-center text-5xl text-text h-[100vh]'><Spinner /></div>;
 
   return (
-    <div style={{ padding: '20px', marginTop: '40px' }}>
-      <h1 className='text-text'>Мониторинг базовых станций</h1>
+    <div style={{ marginTop: '60px', paddingInline: '20px', position: 'absolute', width: '100%'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className='text-text'>Мониторинг базовых станций</h1>
+        <div style={{ color: '#666', fontSize: '0.9rem' }}>
+          Последнее обновление: {lastUpdated}
+        </div>
+      </div>
 
       <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
         <div className="status-box">
