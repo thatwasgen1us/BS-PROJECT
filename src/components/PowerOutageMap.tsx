@@ -33,6 +33,7 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
 
   const renderAlarmsInfo = (alarms: Record<string, string> | string) => {
     if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
+    if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
     
     return (
       <div>
@@ -46,11 +47,13 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
     );
   };
 
+  const stationsWithCoords = stations.filter(s => s.coordinates);
+
   return (
     <div style={{ height: '85vh', width: '100%', position: 'relative' }}>
-      {stations.some(s => s.coordinates) ? (
+      {stationsWithCoords.length > 0 ? (
         <MapContainer 
-          center={[55.008352, 82.935732]}
+          center={[54.9833, 82.8963]} // Центр на Новосибирск
           zoom={11}
           style={{ height: '100%', width: '100%' }}
         >
@@ -59,7 +62,7 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           
-          {stations.filter(s => s.coordinates).map(station => (
+          {stationsWithCoords.map(station => (
             <Marker 
               key={station.id} 
               position={station.coordinates!}
@@ -79,7 +82,7 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
                   <p><strong>Приоритет:</strong> {station.priority}</p>
                   {station.work_order !== '-' && <p><strong>Наряд:</strong> {station.work_order}</p>}
                   {renderAlarmsInfo(station.alarms)}
-                  <p><strong>Комментарий:</strong> {station.comment}</p>
+                  {station.comment && <p><strong>Комментарий:</strong> {station.comment}</p>}
                   {station.visited && <p style={{ color: 'green' }}>Посещена</p>}
                 </div>
               </Popup>
@@ -95,7 +98,7 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
           color: 'red',
           fontWeight: 'bold'
         }}>
-          Нет данных о координатах для отображения на карте
+          Нет станций с координатами для отображения
         </div>
       )}
     </div>
