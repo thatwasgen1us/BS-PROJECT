@@ -887,4 +887,8 @@ const BsSchedule: React.FC = () => {
   );
 };
 
+<<<<<<< HEAD
 export default BsSchedule;
+=======
+export default BsSchedule;
+>>>>>>> 4a0b5d78e61e121a384860855589f08cb2ce3c8e
