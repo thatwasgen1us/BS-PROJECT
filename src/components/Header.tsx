@@ -25,6 +25,12 @@ const Header = () => {
           >
             График напряжения БС
           </Link>
+          <Link
+            to={"/bs-map"}
+            className="transition-all hover:text-blue-300"
+          >
+            Карта БС
+          </Link>
         </nav>
       </div>
     </header>
