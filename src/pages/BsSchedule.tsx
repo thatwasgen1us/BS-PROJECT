@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { useGetBseVoltageInfoQuery } from "../api/api";
 
+
 interface AlarmHistory {
   recorded_at: string;
   status: string | null;
@@ -292,7 +293,7 @@ const BsSchedule: React.FC = () => {
           hovertext: voltageData.map((item: {x: Date, y: number, status: string}) =>
             `Напряжение: ${item.y.toFixed(2)}V<br>` +
             `Время: ${format(item.x, 'PPpp', 
-              //@ts-ignore
+              
               { locale: ru })}<br>` +
             `Статус: ${item.status || 'неизвестно'}`
           )
@@ -320,7 +321,7 @@ const BsSchedule: React.FC = () => {
             `Минимум: ${candle.low.toFixed(2)}V<br>` +
             `Закрытие: ${candle.close.toFixed(2)}V<br>` +
             `Время: ${format(candle.time, 'PPpp', 
-              //@ts-ignore
+              
               { locale: ru })}`
           )
         }
@@ -346,7 +347,7 @@ const BsSchedule: React.FC = () => {
         hovertext: maData.map(item => 
           `SMA-${maPeriod}: ${item.y.toFixed(2)}V<br>` +
           `Время: ${format(item.x, 'PPpp', 
-            //@ts-ignore
+            
             { locale: ru })}`
         )
       });
@@ -370,7 +371,7 @@ const BsSchedule: React.FC = () => {
         hovertext: alarmData.map((item: {x: Date, type: string, status: string | null}) =>
           `${item.status ? 'Появление аварии' : 'Исчезновение аварии'}: ${item.type}<br>` +
           `Время: ${format(item.x, 'PPpp', 
-            //@ts-ignore
+            
             { locale: ru })}<br>` +
           `Статус: ${item.status || 'неизвестно'}`
         )
@@ -807,7 +808,7 @@ const BsSchedule: React.FC = () => {
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     {format(marker.x, 'PPpp', 
-                      //@ts-ignore
+                      
                       { locale: ru })}
                   </div>
                   <div className="text-sm">
@@ -872,7 +873,7 @@ const BsSchedule: React.FC = () => {
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
                         {format(new Date(alarm.recorded_at), 'PPpp', 
-                        //@ts-ignore
+                        
                         { locale: ru })}
                       </td>
                     </tr>
