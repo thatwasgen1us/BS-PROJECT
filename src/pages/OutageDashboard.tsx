@@ -19,15 +19,15 @@ export const transformStationData = (data: ExternalApiResponse): TransformedStat
   return data.flatMap(item => {
     const stationKey = Object.keys(item)[0];
     const stationData = item[stationKey];
-    
+
     return {
       id: stationKey,
       name: stationKey,
       location: stationData.Location,
       voltage: stationData.voltage === "БС недоступна" ? null : parseFloat(stationData.voltage || '0'),
       alarms: stationData.alarms,
-      coordinates: stationData.latitude && stationData.longitude 
-        ? [parseFloat(stationData.latitude), parseFloat(stationData.longitude)] 
+      coordinates: stationData.latitude && stationData.longitude
+        ? [parseFloat(stationData.latitude), parseFloat(stationData.longitude)]
         : null,
       last_update: stationData.Время_аварии,
       priority: stationData.Приоритет,
@@ -40,22 +40,22 @@ export const transformStationData = (data: ExternalApiResponse): TransformedStat
 
 const OutageDashboard = () => {
   const { data: rawStations, isLoading } = useGetLastDataFromExternalApiQuery();
-  
+
   // Преобразуем данные при получении
   const stations = rawStations ? transformStationData(rawStations) : [];
-  
+
   // Фильтруем станции без питания
   const outageStations = stations.filter(s => s.voltage === 0 || s.voltage === null);
-  
+
   // Станции без координат
   const stationsWithoutCoords = stations.filter(s => !s.coordinates);
 
-  if (isLoading) return <div>Загрузка...</div>;
+  if (isLoading) return <div className='flex items-center justify-center text-5xl text-text h-[100vh]'>Загрузка...</div>;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Базы с отключенным питанием</h1>
-      
+    <div style={{ padding: '20px', marginTop: '40px' }}>
+      <h1 className='text-text'>Базы с отключенным питанием</h1>
+
       <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
         <div className="status-box">
           <h3>Всего баз</h3>
@@ -70,14 +70,14 @@ const OutageDashboard = () => {
           <p>{stationsWithoutCoords.length}</p>
         </div>
       </div>
-      
+
       <PowerOutageMap stations={outageStations} />
-      
+
       {stationsWithoutCoords.length > 0 && (
         <div style={{ marginTop: '30px' }}>
           <h2>Станции без координат</h2>
-          <div style={{ 
-            display: 'grid', 
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: '15px',
             marginTop: '15px'

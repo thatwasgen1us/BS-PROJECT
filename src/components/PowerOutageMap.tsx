@@ -47,7 +47,7 @@ const PowerOutageMap: React.FC<{ stations: TransformedStation[] }> = ({ stations
   };
 
   return (
-    <div style={{ height: '85vh', width: '100%', position: 'relative', marginTop: '40px' }}>
+    <div style={{ height: '85vh', width: '100%', position: 'relative' }}>
       {stations.some(s => s.coordinates) ? (
         <MapContainer 
           center={[55.008352, 82.935732]}
