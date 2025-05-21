@@ -31,7 +31,7 @@ interface PowerOutageMapProps {
 
 const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref) => {
   const getMarkerColor = (voltage: number | null) => {
-    if (voltage === null || voltage === 0) return 'gray';
+    if (voltage === null) return 'gray';
     return voltage < 47 ? 'red' : voltage < 52 ? 'orange' : 'green';
   };
 
