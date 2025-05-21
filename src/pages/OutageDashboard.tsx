@@ -202,7 +202,7 @@ const OutageDashboard = () => {
         <div style={{
           flex: 1,
           maxHeight: '87vh',
-          overflowY: 'auto',
+          overflowY: 'hidden',
           border: '1px solid #e0e0e0',
           borderRadius: '5px',
           padding: '10px',
@@ -239,39 +239,41 @@ const OutageDashboard = () => {
             </button>
           </div>
             
-            {sortedStations.map(station => (
-              <div
-                key={station.id}
-                onClick={() => station.coordinates && flyToStation(station.coordinates)}
-                style={{
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: station.voltage === 0 ? '#ffebee' : '#e8f5e9',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  ...(station.voltage === 0 ? {
-                    ':hover': {
-                      backgroundColor: '#ffcdd2',
-                      transform: 'translateX(2px)'
-                    }
-                  } : {
-                    ':hover': {
-                      backgroundColor: '#c8e6c9',
-                      transform: 'translateX(2px)'
-                    }
-                  })
-                }}
-              >
-                <div style={{ fontWeight: 'bold' }}>{station.name}</div>
-                <div style={{ fontSize: '0.8em' }}>Дата аварии: {addHours(station.last_update)}</div>
-                <div style={{ fontSize: '0.8em' }}>
-                  Напряжение: {station.voltage !== null ? `${station.voltage}V` : 'Нет данных'}
+          <div className='overflow-y-scroll max-h-[77vh]'>
+              {sortedStations.map(station => (
+                <div
+                  key={station.id}
+                  onClick={() => station.coordinates && flyToStation(station.coordinates)}
+                  style={{
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    backgroundColor: station.voltage === 0 ? '#ffebee' : '#e8f5e9',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    ...(station.voltage === 0 ? {
+                      ':hover': {
+                        backgroundColor: '#ffcdd2',
+                        transform: 'translateX(2px)'
+                      }
+                    } : {
+                      ':hover': {
+                        backgroundColor: '#c8e6c9',
+                        transform: 'translateX(2px)'
+                      }
+                    })
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold' }}>{station.name}</div>
+                  <div style={{ fontSize: '0.8em' }}>Дата аварии: {addHours(station.last_update)}</div>
+                  <div style={{ fontSize: '0.8em' }}>
+                    Напряжение: {station.voltage !== null ? `${station.voltage}V` : 'Нет данных'}
+                  </div>
+                  <div style={{ fontSize: '0.8em' }}>Приоритет: {station.priority}</div>
+                  <div style={{ fontSize: '0.8em' }}>Длительность: {calculateOutageDuration(station.last_update)}</div>
                 </div>
-                <div style={{ fontSize: '0.8em' }}>Приоритет: {station.priority}</div>
-                <div style={{ fontSize: '0.8em' }}>Длительность: {calculateOutageDuration(station.last_update)}</div>
-              </div>
-            ))}
+              ))}
+          </div>
           </div>
         </div>
       </div>
