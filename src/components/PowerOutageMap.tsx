@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { forwardRef, useEffect } from 'react';
+import { forwardRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
 // Фикс для иконок
