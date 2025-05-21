@@ -190,7 +190,7 @@ const OutageDashboard = () => {
           </div>
         </div>
         <div style={{ fontSize: '0.9rem' }} className='text-text'>
-          Всего баз: {stations.length}
+          Всего аварий POWER: {stations.length}
         </div>
       </div>
 

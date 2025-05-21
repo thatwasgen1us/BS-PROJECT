@@ -637,7 +637,7 @@ const BsVoltage = () => {
         <div>
           <h2 className="text-xl font-semibold">Данные с внешнего API</h2>
           <div>
-            Всего баз по питанию: {externalData ? externalData.length : 0}
+            Всего аварий POWER: {externalData ? externalData.length : 0}
           </div>
           {lastExternalUpdate && (
             <p className="text-sm text-gray-500">
