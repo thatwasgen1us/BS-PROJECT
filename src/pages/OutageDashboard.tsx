@@ -50,6 +50,16 @@ export const transformStationData = (data: ExternalApiResponse): TransformedStat
   });
 };
 
+const calculateOutageDuration = (lastUpdate: string) => {
+  const serverDate = new Date(lastUpdate.replace(' ', 'T'));
+  const adjustedDate: any = new Date(serverDate.getTime() + 4 * 60 * 60 * 1000); 
+  const diffMinutes = Math.floor((Date.now() - adjustedDate) / (1000 * 60));
+  
+  if (diffMinutes < 60) return `${diffMinutes} мин.`;
+  return `${Math.floor(diffMinutes/60)} ч. ${diffMinutes%60} мин.`;
+};
+
+
 const OutageDashboard = () => {
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
   const { data: rawStations, isLoading } = useGetLastDataFromExternalApiQuery(undefined, {
@@ -169,6 +179,7 @@ const OutageDashboard = () => {
                   Напряжение: {station.voltage !== null ? `${station.voltage}V` : 'Нет данных'}
                 </div>
                 <div style={{ fontSize: '0.8em' }}>Приоритет: {station.priority}</div>
+                <div style={{ fontSize: '0.8em' }}>Длительность: {calculateOutageDuration(station.last_update)}</div>
               </div>
             ))}
           </div>

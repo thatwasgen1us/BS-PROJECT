@@ -37,21 +37,35 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
 
 
   const renderAlarmsInfo = (alarms: Record<string, string> | string) => {
-    if (!alarms) return <p>Нет данных о тревогах</p>;
-    if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
-    if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
+  if (!alarms) return <p>Нет данных о тревогах</p>;
+  if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
+  if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
 
-    return (
-      <div>
-        <p>Активные аварии:</p>
-        <ul>
-          {Object.entries(alarms).map(([type, time]) => (
-            <li key={type}>{type}: {new Date(time).toLocaleString()}</li>
-          ))}
-        </ul>
-      </div>
-    );
+  const parseCustomDate = (dateStr: string) => {
+    // Формат: "20250521110411.431+0700"
+    const year = parseInt(dateStr.substring(0, 4));
+    const month = parseInt(dateStr.substring(4, 6)) - 1; // Месяцы 0-11
+    const day = parseInt(dateStr.substring(6, 8));
+    const hours = parseInt(dateStr.substring(8, 10));
+    const minutes = parseInt(dateStr.substring(10, 12));
+    const seconds = parseInt(dateStr.substring(12, 14));
+    
+    return new Date(year, month, day, hours, minutes, seconds);
   };
+
+  return (
+    <div>
+      <p>Активные аварии:</p>
+      <ul>
+        {Object.entries(alarms).map(([type, time]) => (
+          <li key={type}>
+            {type}: {parseCustomDate(time).toLocaleString()}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
   const stationsWithCoords = stations.filter(s => s.coordinates);
 
