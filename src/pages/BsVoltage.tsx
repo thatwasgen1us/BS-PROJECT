@@ -381,15 +381,18 @@ const BsVoltage = () => {
         }
 
         if (externalSortConfig.key === 'priority') {
-          if (a.priority < b.priority) {
-            return externalSortConfig.direction === 'ascending' ? -1 : 1;
-          }
-          if (a.priority > b.priority) {
-            return externalSortConfig.direction === 'ascending' ? 1 : -1;
-          }
-          return 0;
+        const aPriority = Number(a.priority);
+        const bPriority = Number(b.priority);
+              
+        if (aPriority < bPriority) {
+          return externalSortConfig.direction === 'ascending' ? -1 : 1;
         }
-
+        if (aPriority > bPriority) {
+          return externalSortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+        }
+      
         const aValue = a[externalSortConfig.key as keyof ExternalApiStation]?.toString().toLowerCase() || "";
         const bValue = b[externalSortConfig.key as keyof ExternalApiStation]?.toString().toLowerCase() || "";
 

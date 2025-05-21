@@ -90,8 +90,8 @@ const OutageDashboard = () => {
       stationsWithCoords.map(s => s.coordinates!)
     );
     mapRef.current.flyToBounds(bounds, {
-      padding: [100, 100], // Тот же отступ, что и при инициализации
-      duration: 1 // Та же длительность анимации
+      padding: [100, 100], 
+      duration: 1 
     });
   }
 };

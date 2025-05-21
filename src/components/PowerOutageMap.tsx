@@ -101,7 +101,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution='Картографические данные &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
           />
 
           {stationsWithCoords.map(station => (

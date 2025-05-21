@@ -82,3 +82,7 @@ header {
   background: transparent;
   border: none;
 }
+
+.leaflet-control-attribution {
+  display: none !important;
+}
