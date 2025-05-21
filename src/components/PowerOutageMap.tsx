@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { forwardRef, useEffect } from 'react';
+import { forwardRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
 // Фикс для иконок
@@ -31,8 +31,8 @@ interface PowerOutageMapProps {
 
 const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref) => {
   const getMarkerColor = (voltage: number | null) => {
-    if (voltage === null) return 'gray';
-    return voltage === 0 ? 'red' : voltage < 50 ? 'orange' : 'green';
+    if (voltage === null || voltage === 0) return 'gray';
+    return voltage < 47 ? 'red' : voltage < 52 ? 'orange' : 'green';
   };
 
   const renderAlarmsInfo = (alarms: Record<string, string> | string) => {
@@ -73,7 +73,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
       {stationsWithCoords.length > 0 ? (
         <MapContainer
           ref={ref}
-          center={[55.016349, 82.194149]} 
+          center={[55.073855, 81.104656]} 
           zoom={8}
           minZoom={7}  
           maxZoom={18} 
