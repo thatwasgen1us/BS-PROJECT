@@ -32,71 +32,51 @@ interface PowerOutageMapProps {
 const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref) => {
   const getMarkerColor = (voltage: number | null) => {
     if (voltage === null) return 'gray';
-    return voltage === 0 ? 'red' : voltage < 45 ? 'orange' : 'green';
+    return voltage === 0 ? 'red' : voltage < 50 ? 'orange' : 'green';
   };
-
 
   const renderAlarmsInfo = (alarms: Record<string, string> | string) => {
-  if (!alarms) return <p>Нет данных о тревогах</p>;
-  if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
-  if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
+    if (!alarms) return <p>Нет данных о тревогах</p>;
+    if (typeof alarms === 'string') return <p>Аварии: {alarms}</p>;
+    if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
 
-  const parseCustomDate = (dateStr: string) => {
-    // Формат: "20250521110411.431+0700"
-    const year = parseInt(dateStr.substring(0, 4));
-    const month = parseInt(dateStr.substring(4, 6)) - 1; // Месяцы 0-11
-    const day = parseInt(dateStr.substring(6, 8));
-    const hours = parseInt(dateStr.substring(8, 10));
-    const minutes = parseInt(dateStr.substring(10, 12));
-    const seconds = parseInt(dateStr.substring(12, 14));
-    
-    return new Date(year, month, day, hours, minutes, seconds);
+    const parseCustomDate = (dateStr: string) => {
+      // Формат: "20250521110411.431+0700"
+      const year = parseInt(dateStr.substring(0, 4));
+      const month = parseInt(dateStr.substring(4, 6)) - 1; // Месяцы 0-11
+      const day = parseInt(dateStr.substring(6, 8));
+      const hours = parseInt(dateStr.substring(8, 10));
+      const minutes = parseInt(dateStr.substring(10, 12));
+      const seconds = parseInt(dateStr.substring(12, 14));
+
+      return new Date(year, month, day, hours, minutes, seconds);
+    };
+
+    return (
+      <div>
+        <p>Активные аварии:</p>
+        <ul>
+          {Object.entries(alarms).map(([type, time]) => (
+            <li key={type}>
+              {type}: {parseCustomDate(time).toLocaleString()}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   };
 
-  return (
-    <div>
-      <p>Активные аварии:</p>
-      <ul>
-        {Object.entries(alarms).map(([type, time]) => (
-          <li key={type}>
-            {type}: {parseCustomDate(time).toLocaleString()}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
   const stationsWithCoords = stations.filter(s => s.coordinates);
-
-  useEffect(() => {
-  if (stationsWithCoords.length > 0 && ref && typeof ref !== 'function') {
-    const timer = setTimeout(() => {
-      const map = ref?.current;
-      if (map) {
-        const bounds = L.latLngBounds(
-          stationsWithCoords.map(s => s.coordinates!)
-        );
-        map.flyToBounds(bounds, {
-          padding: [100, 100],
-          duration: 1
-        });
-      }
-    }, 100); // 100ms задержка
-    
-    return () => clearTimeout(timer);
-  }
-}, [stationsWithCoords, ref]);
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       {stationsWithCoords.length > 0 ? (
         <MapContainer
           ref={ref}
-          center={[54.9833, 82.8963]} // Центр Новосибирска
+          center={[55.016349, 82.194149]} 
           zoom={8}
-          minZoom={7}  // Минимальный зум для просмотра всего города
-          maxZoom={18} // Максимальный зум для детального просмотра
+          minZoom={7}  
+          maxZoom={18} 
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
@@ -126,7 +106,6 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
                       display: flex;
                       justify-content: center;
                       align-items: center;
-
                     ">
                       <span style="
                         color: black;
@@ -150,8 +129,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
                   <p><strong>Приоритет:</strong> {station.priority}</p>
                   {station.work_order !== '-' && <p><strong>Наряд:</strong> {station.work_order}</p>}
                   {renderAlarmsInfo(station.alarms)}
-                  {station.comment && <p><strong>Комментарий:</strong> {station.comment}</p>}
-                  {station.visited && <p style={{ color: 'green' }}>Посещена</p>}
+                  {station.visited && <p style={{ color: 'green' }}>Посещение</p>}
                 </div>
               </Popup>
             </Marker>
