@@ -73,7 +73,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
       {stationsWithCoords.length > 0 ? (
         <MapContainer
           ref={ref}
-          center={[55.016349, 82.194149]} 
+          center={[55.073855, 81.104656]} 
           zoom={8}
           minZoom={7}  
           maxZoom={18} 
