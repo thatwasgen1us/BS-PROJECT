@@ -147,10 +147,15 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
                         <strong>Наряд:</strong> {station.work_order}
                       </p>
                     )}
-                    {renderAlarmsInfo(station.alarms)}
-                    {station.visited && (
-                      <p style={{ color: "green" }}>Посещение</p>
+
+                    {station.visited ? (
+                      <strong>Посещение: <span style={{ color: "green" }}>true</span></strong>
+                    ) : (
+                      <strong>Посещение: <span style={{ color: "red" }}>false</span></strong>
                     )}
+                                    
+                    {renderAlarmsInfo(station.alarms)}
+                    
                   </div>
                 </Popup>
               </Marker>
