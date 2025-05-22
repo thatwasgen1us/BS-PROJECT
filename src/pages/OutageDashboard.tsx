@@ -83,7 +83,6 @@ const calculateDurationValue = (lastUpdate: string) => {
 };
 
 const OutageDashboard = () => {
-  const [showColorLegend, setShowColorLegend] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>(
     new Date().toLocaleTimeString()
   );
