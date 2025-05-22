@@ -34,8 +34,8 @@ interface PowerOutageMapProps {
 
 const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
   ({ stations }, ref) => {
-    const getMarkerColor = (voltage: number | null) => {
-      if (voltage === null) return "gray";
+    const getMarkerColor = (voltage: number | null ) => {
+      if (voltage === null || typeof voltage !== 'number') return "gray";
       return voltage < 47 ? "red" : voltage < 52 ? "orange" : "green";
     };
 
@@ -153,7 +153,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
                     ) : (
                       <strong>Посещение: <span style={{ color: "red" }}>false</span></strong>
                     )}
-                                    
+
                     {renderAlarmsInfo(station.alarms)}
                     
                   </div>

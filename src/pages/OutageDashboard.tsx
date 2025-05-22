@@ -273,7 +273,7 @@ const OutageDashboard = () => {
                 border: "1px solid #fff",
               }}
             ></div>
-            <span>Нет данных</span>
+            <span>БС недоступна</span>
           </div>
         </div>
       </div>
