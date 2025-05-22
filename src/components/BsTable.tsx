@@ -24,7 +24,8 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
         {/* Данные таблицы */}
         <div className="text-center bg-white divide-y divide-gray-200">
           {data?.map((week: WeekData, index: number) => {
-            const isHasText = week.combined_text !== null && week.combined_text.length > 1;
+            const isHasText =
+              week.combined_text !== null && week.combined_text.length > 1;
             const isCA2GLessThan100 = Number(week.CA_2G) < 100;
             const isCountOfAlarmsGreaterThan0 =
               Number(week.count_of_alarms) > 0;
@@ -37,14 +38,18 @@ const BsTable: React.FC<Props> = ({ dataInfo }) => {
               return (
                 <div
                   key={week.weak || index}
-                  className={hashValue.toUpperCase() === week.weak ? "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 bg-blue-500 text-white" : "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 text-gray-800 hover:bg-gray-50"}
+                  className={
+                    hashValue.toUpperCase() === week.weak
+                      ? "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 bg-blue-500 text-white"
+                      : "grid grid-cols-[repeat(5,100px)_1fr] gap-4 p-3 transition-colors duration-200 text-gray-800 hover:bg-gray-50"
+                  }
                 >
                   <div id={week.weak}>{week.weak}</div>
                   <div>{week.change_of_battery}</div>
                   <div>{week.count_of_alarms}</div>
                   <div>
                     {typeof week.time_of_alarms === "string" &&
-                      week.time_of_alarms.length > 0
+                    week.time_of_alarms.length > 0
                       ? week.time_of_alarms.includes("1900")
                         ? week.time_of_alarms.split("T")[1]?.split(".")[0]
                         : week.time_of_alarms.split(".")[0]

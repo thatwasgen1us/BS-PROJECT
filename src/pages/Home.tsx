@@ -8,7 +8,7 @@ const Home = () => {
   const [baseInfo, setBaseInfo] = useState<SiteInfo | null>(null);
 
   const handleBaseInfoUpdate = (data: SiteInfo) => {
-    setBaseInfo(data); 
+    setBaseInfo(data);
   };
 
   return (

@@ -26,7 +26,6 @@ body {
   }
 }
 
-
 :root {
   --background: #f8fafc;
   --text: #1e293b;
@@ -52,11 +51,11 @@ body {
 } */
 
 header {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  z-index: 1000; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 }
 
 .status-box {

@@ -69,21 +69,21 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
 
   const handleAnchorClick = useCallback(
     (event: React.MouseEvent, item: WeekData & { CA_2G: string | number }) => {
-      event.preventDefault(); 
-  
+      event.preventDefault();
+
       navigate(`#${item.weak}`, { replace: true });
-  
+
       setTimeout(() => {
         const element = document.getElementById(item.weak);
         if (element) {
           element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center', 
+            behavior: "smooth",
+            block: "center",
           });
         }
       }, 100);
     },
-    [navigate] 
+    [navigate]
   );
 
   return (
@@ -98,7 +98,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
                   : null;
                 return (
                   <Link
-                    to={`#${item.weak}`} 
+                    to={`#${item.weak}`}
                     key={item.weak}
                     className="flex items-center justify-center w-8 h-8 p-2 duration-75 border border-gray-300 rounded cursor-default du hover:scale-105"
                     style={{ backgroundColor: getColor(item.CA_2G) }}
@@ -118,7 +118,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
           <div>No data available</div>
         )}
       </div>
-  
+
       {tooltip.visible && (
         <div
           className="fixed z-50 p-2 bg-white border border-black rounded shadow-lg tooltip"

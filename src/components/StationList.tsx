@@ -12,15 +12,17 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
   const { data, isLoading, error } = useGetBaseDataQuery();
   const uniqueStationNames = new Set();
 
-  const [sortCriteria, setSortCriteria] = useState<'name' | 'month' | 'year'>('name'); 
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); 
+  const [sortCriteria, setSortCriteria] = useState<"name" | "month" | "year">(
+    "name"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [hideZeroBases, setHideZeroBases] = useState(() => {
-    const savedValue = localStorage.getItem('hideZeroBases');
-    return savedValue === 'true'; 
+    const savedValue = localStorage.getItem("hideZeroBases");
+    return savedValue === "true";
   });
 
   useEffect(() => {
-    localStorage.setItem('hideZeroBases', hideZeroBases.toString());
+    localStorage.setItem("hideZeroBases", hideZeroBases.toString());
   }, [hideZeroBases]);
 
   const filteredStations = useMemo(() => {
@@ -28,7 +30,9 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     return data.filter((station) => {
       const isUnique = !uniqueStationNames.has(station.BS_NAME);
       uniqueStationNames.add(station.BS_NAME);
-      const matchesSearchTerm = station.BS_NAME.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearchTerm = station.BS_NAME.toLowerCase().includes(
+        searchTerm.toLowerCase()
+      );
       const isZeroBase = hideZeroBases ? Number(station.CA_52w) !== 0 : true;
       return isUnique && matchesSearchTerm && isZeroBase;
     });
@@ -38,25 +42,25 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     return [...filteredStations].sort((a, b) => {
       let comparison = 0;
       switch (sortCriteria) {
-        case 'name':
+        case "name":
           comparison = a.BS_NAME.localeCompare(b.BS_NAME);
           break;
-        case 'month':
-          comparison = b.CA_4w - a.CA_4w; 
+        case "month":
+          comparison = b.CA_4w - a.CA_4w;
           break;
-        case 'year':
-          comparison = b.CA_52w - a.CA_52w; 
+        case "year":
+          comparison = b.CA_52w - a.CA_52w;
           break;
         default:
           return 0;
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === "asc" ? comparison : -comparison;
     });
   }, [filteredStations, sortCriteria, sortOrder]);
 
-  const handleSort = useCallback((criteria: 'name' | 'month' | 'year') => {
+  const handleSort = useCallback((criteria: "name" | "month" | "year") => {
     setSortCriteria(criteria);
-    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   }, []);
 
   if (isLoading) {
@@ -86,21 +90,22 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
         <div className="flex items-center justify-around py-2 font-bold">
           <button
             className="cursor-pointer hover:text-blue-600"
-            onClick={() => handleSort('name')}
+            onClick={() => handleSort("name")}
           >
-            База {sortCriteria === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+            База {sortCriteria === "name" && (sortOrder === "asc" ? "↑" : "↓")}
           </button>
           <button
             className="cursor-pointer hover:text-blue-600"
-            onClick={() => handleSort('month')}
+            onClick={() => handleSort("month")}
           >
-            Месяц {sortCriteria === 'month' && (sortOrder === 'asc' ? '↑' : '↓')}
+            Месяц{" "}
+            {sortCriteria === "month" && (sortOrder === "asc" ? "↑" : "↓")}
           </button>
           <button
             className="cursor-pointer hover:text-blue-600"
-            onClick={() => handleSort('year')}
+            onClick={() => handleSort("year")}
           >
-            Год {sortCriteria === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
+            Год {sortCriteria === "year" && (sortOrder === "asc" ? "↑" : "↓")}
           </button>
         </div>
       </div>
@@ -113,14 +118,20 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
               to={`/base/${station.BS_NAME}`}
               key={station.BS_NAME + index}
               className={`flex items-center justify-between p-4 transition-all duration-200 rounded-lg shadow-sm hover:shadow-md ${
-                station.BS_NAME === stationId ? "bg-accent" : "bg-background hover:bg-accent"
+                station.BS_NAME === stationId
+                  ? "bg-accent"
+                  : "bg-background hover:bg-accent"
               }`}
             >
               <div className="text-lg font-semibold text-text">
                 {station.BS_NAME}
               </div>
-              <div className="text-lg text-text">{Number(station.CA_4w).toFixed(2)}%</div>
-              <div className="text-lg text-text">{Number(station.CA_52w).toFixed(2)}%</div>
+              <div className="text-lg text-text">
+                {Number(station.CA_4w).toFixed(2)}%
+              </div>
+              <div className="text-lg text-text">
+                {Number(station.CA_52w).toFixed(2)}%
+              </div>
             </Link>
           ))
         ) : (

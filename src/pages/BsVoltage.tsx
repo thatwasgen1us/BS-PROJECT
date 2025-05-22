@@ -1,7 +1,7 @@
 import {
   useGetBaseDataQuery,
   useGetLastDataFromExternalApiQuery,
-  useLazyGetBaseVoltageQuery
+  useLazyGetBaseVoltageQuery,
 } from "@/api/api";
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -29,7 +29,15 @@ interface ExternalApiStation {
   comment?: string;
 }
 
-const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW", "SECOFF", "FIRE"];
+const ALLOWED_ALARMS = [
+  "POWER",
+  "RECTIFIER",
+  "DOOR",
+  "TEMP_HIGH_",
+  "TEMP_LOW",
+  "SECOFF",
+  "FIRE",
+];
 const EXTERNAL_API_REFRESH_INTERVAL = 3 * 60 * 1000;
 
 const TrashIcon = styled.svg`
@@ -53,7 +61,15 @@ const formatTimestamp = (timestamp: string): string => {
       seconds = parseInt(timestamp.slice(12, 14)),
       milliseconds = parseInt(timestamp.slice(15, 18));
 
-    const date = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+    const date = new Date(
+      year,
+      month,
+      day,
+      hours,
+      minutes,
+      seconds,
+      milliseconds
+    );
 
     return date.toLocaleString("ru-RU", {
       year: "numeric",
@@ -64,8 +80,8 @@ const formatTimestamp = (timestamp: string): string => {
       second: "2-digit",
     });
   } catch (error) {
-    console.error('Error parsing timestamp', timestamp);
-    return 'Invalid date';
+    console.error("Error parsing timestamp", timestamp);
+    return "Invalid date";
   }
 };
 
@@ -81,9 +97,19 @@ const calculateDuration = (timestamp: string): string => {
       seconds = parseInt(timestamp.slice(12, 14)),
       milliseconds = parseInt(timestamp.slice(15, 18));
 
-    const alarmDate = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+    const alarmDate = new Date(
+      year,
+      month,
+      day,
+      hours,
+      minutes,
+      seconds,
+      milliseconds
+    );
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - alarmDate.getTime()) / 1000);
+    const diffInSeconds = Math.floor(
+      (now.getTime() - alarmDate.getTime()) / 1000
+    );
 
     const hoursDiff = Math.floor(diffInSeconds / 3600);
     const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
@@ -91,20 +117,33 @@ const calculateDuration = (timestamp: string): string => {
 
     return `${String(hoursDiff).padStart(2, "0")}:${String(minutesDiff).padStart(2, "0")}:${String(secondsDiff).padStart(2, "0")}`;
   } catch (error) {
-    console.error('Error calculating duration', timestamp);
-    return 'N/A';
+    console.error("Error calculating duration", timestamp);
+    return "N/A";
   }
 };
 
 const LoadingSpinner = () => (
-  <svg aria-hidden="true" role="status" className="inline w-4 h-4 text-white me-3 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB" />
-    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor" />
+  <svg
+    aria-hidden="true"
+    role="status"
+    className="inline w-4 h-4 text-white me-3 animate-spin"
+    viewBox="0 0 100 101"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+      fill="#E5E7EB"
+    />
+    <path
+      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+      fill="currentColor"
+    />
   </svg>
 );
 
 const BsVoltage = () => {
-  const [lastExternalUpdate, setLastExternalUpdate] = useState<string>('');
+  const [lastExternalUpdate, setLastExternalUpdate] = useState<string>("");
   const [newBsName, setNewBsName] = useState<string>("NS");
   const [bssList, setBssList] = useState<BaseStation[]>(() => {
     const savedBssList = localStorage.getItem("bssList");
@@ -116,16 +155,20 @@ const BsVoltage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
-    direction: 'ascending' | 'descending';
+    direction: "ascending" | "descending";
   } | null>(null);
   const [externalSortConfig, setExternalSortConfig] = useState<{
     key: string;
-    direction: 'ascending' | 'descending';
+    direction: "ascending" | "descending";
   } | null>(null);
 
   const { data: baseData } = useGetBaseDataQuery();
   const [trigger] = useLazyGetBaseVoltageQuery();
-  const { data: externalData, isLoading: isExternalLoading, refetch: refetchExternalData } = useGetLastDataFromExternalApiQuery();
+  const {
+    data: externalData,
+    isLoading: isExternalLoading,
+    refetch: refetchExternalData,
+  } = useGetLastDataFromExternalApiQuery();
 
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
@@ -154,14 +197,15 @@ const BsVoltage = () => {
     };
   }, [refreshEnabled, refreshInterval]);
 
-  
   const handleAddBs = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newBsName.trim() === "") return;
 
     const isValidBsName = /^NS\d{4}$/.test(newBsName);
     if (!isValidBsName) {
-      setErrorMessage("Имя БС должно состоять из 6 символов: 'NS' и 4 цифры (например, NS1234).");
+      setErrorMessage(
+        "Имя БС должно состоять из 6 символов: 'NS' и 4 цифры (например, NS1234)."
+      );
       return;
     }
 
@@ -209,7 +253,9 @@ const BsVoltage = () => {
     }
   };
 
-  const handleRefreshIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRefreshIntervalChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const value = parseInt(e.target.value, 10);
     setRefreshInterval(value);
     setRefreshEnabled(value > 0);
@@ -256,17 +302,20 @@ const BsVoltage = () => {
   };
 
   const requestSort = (key: string) => {
-    let direction: 'ascending' | 'descending' = 'ascending';
-    if (sortConfig?.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
+    let direction: "ascending" | "descending" = "ascending";
+    if (sortConfig?.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
     }
     setSortConfig({ key, direction });
   };
 
   const requestExternalSort = (key: string) => {
-    let direction: 'ascending' | 'descending' = 'ascending';
-    if (externalSortConfig?.key === key && externalSortConfig.direction === 'ascending') {
-      direction = 'descending';
+    let direction: "ascending" | "descending" = "ascending";
+    if (
+      externalSortConfig?.key === key &&
+      externalSortConfig.direction === "ascending"
+    ) {
+      direction = "descending";
     }
     setExternalSortConfig({ key, direction });
   };
@@ -275,38 +324,50 @@ const BsVoltage = () => {
     let sortableItems = [...bssList];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        if (sortConfig.key === 'voltage') {
-          const aVoltage = typeof a.voltage === 'number' ? a.voltage : 0;
-          const bVoltage = typeof b.voltage === 'number' ? b.voltage : 0;
+        if (sortConfig.key === "voltage") {
+          const aVoltage = typeof a.voltage === "number" ? a.voltage : 0;
+          const bVoltage = typeof b.voltage === "number" ? b.voltage : 0;
           if (aVoltage < bVoltage) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
+            return sortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aVoltage > bVoltage) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
+            return sortConfig.direction === "ascending" ? 1 : -1;
           }
           return 0;
         }
 
-        if (sortConfig.key === 'duration' && a.duration !== "N/A" && b.duration !== "N/A") {
-          const aTime = a.duration.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
-          const bTime = b.duration.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
+        if (
+          sortConfig.key === "duration" &&
+          a.duration !== "N/A" &&
+          b.duration !== "N/A"
+        ) {
+          const aTime = a.duration
+            .split(":")
+            .reduce((acc, time) => 60 * acc + +time, 0);
+          const bTime = b.duration
+            .split(":")
+            .reduce((acc, time) => 60 * acc + +time, 0);
           if (aTime < bTime) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
+            return sortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aTime > bTime) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
+            return sortConfig.direction === "ascending" ? 1 : -1;
           }
           return 0;
         }
 
-        const aValue = a[sortConfig.key as keyof BaseStation]?.toString().toLowerCase() || "";
-        const bValue = b[sortConfig.key as keyof BaseStation]?.toString().toLowerCase() || "";
+        const aValue =
+          a[sortConfig.key as keyof BaseStation]?.toString().toLowerCase() ||
+          "";
+        const bValue =
+          b[sortConfig.key as keyof BaseStation]?.toString().toLowerCase() ||
+          "";
 
         if (aValue < bValue) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
+          return sortConfig.direction === "ascending" ? -1 : 1;
         }
         if (aValue > bValue) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
+          return sortConfig.direction === "ascending" ? 1 : -1;
         }
         return 0;
       });
@@ -330,7 +391,7 @@ const BsVoltage = () => {
         workEx: stationInfo["Наряд_на_работы"],
         baseLocation: stationInfo.Location,
         visit: stationInfo["Посещение"],
-        comment: stationInfo["Комментарий"]
+        comment: stationInfo["Комментарий"],
       };
     });
   }, [externalData]);
@@ -341,55 +402,69 @@ const BsVoltage = () => {
     let sortableItems = [...externalStations];
     if (externalSortConfig !== null) {
       sortableItems.sort((a, b) => {
-        if (externalSortConfig.key === 'voltage') {
-          const aVoltage = typeof a.voltage === 'number' ? a.voltage : 0;
-          const bVoltage = typeof b.voltage === 'number' ? b.voltage : 0;
+        if (externalSortConfig.key === "voltage") {
+          const aVoltage = typeof a.voltage === "number" ? a.voltage : 0;
+          const bVoltage = typeof b.voltage === "number" ? b.voltage : 0;
           if (aVoltage < bVoltage) {
-            return externalSortConfig.direction === 'ascending' ? -1 : 1;
+            return externalSortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aVoltage > bVoltage) {
-            return externalSortConfig.direction === 'ascending' ? 1 : -1;
+            return externalSortConfig.direction === "ascending" ? 1 : -1;
           }
           return 0;
         }
 
-        if (externalSortConfig.key === 'duration') {
-          const aDuration = Object.values(a.alarms).find(t => t) || "";
-          const bDuration = Object.values(b.alarms).find(t => t) || "";
+        if (externalSortConfig.key === "duration") {
+          const aDuration = Object.values(a.alarms).find((t) => t) || "";
+          const bDuration = Object.values(b.alarms).find((t) => t) || "";
 
-          const aTime = aDuration ? calculateDuration(String(aDuration)).split(':').reduce((acc, time) => (60 * acc) + +time, 0) : 0;
-          const bTime = bDuration ? calculateDuration(String(bDuration)).split(':').reduce((acc, time) => (60 * acc) + +time, 0) : 0;
+          const aTime = aDuration
+            ? calculateDuration(String(aDuration))
+                .split(":")
+                .reduce((acc, time) => 60 * acc + +time, 0)
+            : 0;
+          const bTime = bDuration
+            ? calculateDuration(String(bDuration))
+                .split(":")
+                .reduce((acc, time) => 60 * acc + +time, 0)
+            : 0;
 
           if (aTime < bTime) {
-            return externalSortConfig.direction === 'ascending' ? -1 : 1;
+            return externalSortConfig.direction === "ascending" ? -1 : 1;
           }
           if (aTime > bTime) {
-            return externalSortConfig.direction === 'ascending' ? 1 : -1;
+            return externalSortConfig.direction === "ascending" ? 1 : -1;
           }
           return 0;
         }
 
-        if (externalSortConfig.key === 'priority') {
-        const aPriority = Number(a.priority);
-        const bPriority = Number(b.priority);
-              
-        if (aPriority < bPriority) {
-          return externalSortConfig.direction === 'ascending' ? -1 : 1;
+        if (externalSortConfig.key === "priority") {
+          const aPriority = Number(a.priority);
+          const bPriority = Number(b.priority);
+
+          if (aPriority < bPriority) {
+            return externalSortConfig.direction === "ascending" ? -1 : 1;
+          }
+          if (aPriority > bPriority) {
+            return externalSortConfig.direction === "ascending" ? 1 : -1;
+          }
+          return 0;
         }
-        if (aPriority > bPriority) {
-          return externalSortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-        }
-      
-        const aValue = a[externalSortConfig.key as keyof ExternalApiStation]?.toString().toLowerCase() || "";
-        const bValue = b[externalSortConfig.key as keyof ExternalApiStation]?.toString().toLowerCase() || "";
+
+        const aValue =
+          a[externalSortConfig.key as keyof ExternalApiStation]
+            ?.toString()
+            .toLowerCase() || "";
+        const bValue =
+          b[externalSortConfig.key as keyof ExternalApiStation]
+            ?.toString()
+            .toLowerCase() || "";
 
         if (aValue < bValue) {
-          return externalSortConfig.direction === 'ascending' ? -1 : 1;
+          return externalSortConfig.direction === "ascending" ? -1 : 1;
         }
         if (aValue > bValue) {
-          return externalSortConfig.direction === 'ascending' ? 1 : -1;
+          return externalSortConfig.direction === "ascending" ? 1 : -1;
         }
         return 0;
       });
@@ -400,12 +475,32 @@ const BsVoltage = () => {
   const renderExternalApiTable = () => (
     <div className="mb-4 text-center">
       <div className="grid grid-cols-10 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
-        <SortableHeader label="БС" sortKey="name" sortConfig={externalSortConfig} onSort={requestExternalSort} />
-        <SortableHeader label="Напряжение" sortKey="voltage" sortConfig={externalSortConfig} onSort={requestExternalSort} />
+        <SortableHeader
+          label="БС"
+          sortKey="name"
+          sortConfig={externalSortConfig}
+          onSort={requestExternalSort}
+        />
+        <SortableHeader
+          label="Напряжение"
+          sortKey="voltage"
+          sortConfig={externalSortConfig}
+          onSort={requestExternalSort}
+        />
         <div className="flex items-center justify-center">Авария</div>
-        <SortableHeader label="Длительность" sortKey="duration" sortConfig={externalSortConfig} onSort={requestExternalSort} />
+        <SortableHeader
+          label="Длительность"
+          sortKey="duration"
+          sortConfig={externalSortConfig}
+          onSort={requestExternalSort}
+        />
         <div className="flex items-center justify-center">Статус</div>
-        <SortableHeader label="Приоритет" sortKey="priority" sortConfig={externalSortConfig} onSort={requestExternalSort} />
+        <SortableHeader
+          label="Приоритет"
+          sortKey="priority"
+          sortConfig={externalSortConfig}
+          onSort={requestExternalSort}
+        />
         <div className="flex items-center justify-center">Выдача задания</div>
         <div className="flex items-center justify-center">Локация</div>
         <div className="flex items-center justify-center">Посещение</div>
@@ -430,71 +525,85 @@ const BsVoltage = () => {
   );
 
   const renderExternalStationRow = (station: ExternalApiStation) => {
-    const isErrorState = station.voltage === "Ошибка" || station.voltage === "БС недоступна";
-  
-  const alarms = typeof station.alarms === 'string' 
-    ? {} 
-    : station.alarms || {};
-  
-  const powerAlarmTimestamp = alarms.POWER; 
-  const hasPowerAlarm = !!powerAlarmTimestamp;
+    const isErrorState =
+      station.voltage === "Ошибка" || station.voltage === "БС недоступна";
 
-  const activeAlarms = Object.entries(alarms)
-    .filter(([key]) => !['No_connection_to_unit', 'status'].includes(key));
+    const alarms =
+      typeof station.alarms === "string" ? {} : station.alarms || {};
 
-  let status = "Норма";
-  if (station.voltage === "БС недоступна" || isErrorState) {
-    status = "Недоступна";
-  } else if (activeAlarms.length > 0) {
-    status = "Авария";
-  } else if (typeof station.voltage === 'number' && station.voltage < 47) {
-    status = "Низкое напряжение";
-  }
+    const powerAlarmTimestamp = alarms.POWER;
+    const hasPowerAlarm = !!powerAlarmTimestamp;
+
+    const activeAlarms = Object.entries(alarms).filter(
+      ([key]) => !["No_connection_to_unit", "status"].includes(key)
+    );
+
+    let status = "Норма";
+    if (station.voltage === "БС недоступна" || isErrorState) {
+      status = "Недоступна";
+    } else if (activeAlarms.length > 0) {
+      status = "Авария";
+    } else if (typeof station.voltage === "number" && station.voltage < 47) {
+      status = "Низкое напряжение";
+    }
     return (
       <div
         key={station.name}
         className="grid grid-cols-10 gap-4 p-3 text-gray-800 transition-colors duration-200 hover:bg-gray-50"
       >
         <div>{station.name}</div>
-        <div className={`text-center ${isErrorState ? "text-red-500" :
-            typeof station.voltage === 'number'
-              ? station.voltage < 47
-                ? "text-red-500"
-                : station.voltage < 50
-                  ? "text-yellow-500"
-                  : "text-green-500"
-              : "text-red-500"
-          }`}>
-          {isErrorState ? "Ошибка" :
-            typeof station.voltage === 'number' ? `${station.voltage} V` : station.voltage}
+        <div
+          className={`text-center ${
+            isErrorState
+              ? "text-red-500"
+              : typeof station.voltage === "number"
+                ? station.voltage < 47
+                  ? "text-red-500"
+                  : station.voltage < 50
+                    ? "text-yellow-500"
+                    : "text-green-500"
+                : "text-red-500"
+          }`}
+        >
+          {isErrorState
+            ? "Ошибка"
+            : typeof station.voltage === "number"
+              ? `${station.voltage} V`
+              : station.voltage}
         </div>
         <div className="text-left break-words">
           {isErrorState ? (
-          <div className="text-sm text-red-500">Ошибка получения данных</div>
-        ) : activeAlarms.length > 0 ? (
-          activeAlarms.map(([alarm, timestamp]) => (
-            <div key={alarm} className="text-sm text-red-500">
-              {alarm}: {formatTimestamp(timestamp)}
-            </div>
-          ))
-        ) : (
-          <span className="text-green-500">Нет аварий</span>
-        )}
+            <div className="text-sm text-red-500">Ошибка получения данных</div>
+          ) : activeAlarms.length > 0 ? (
+            activeAlarms.map(([alarm, timestamp]) => (
+              <div key={alarm} className="text-sm text-red-500">
+                {alarm}: {formatTimestamp(timestamp)}
+              </div>
+            ))
+          ) : (
+            <span className="text-green-500">Нет аварий</span>
+          )}
         </div>
         <div>
           {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
         </div>
-        <div className={`text-center ${status === "Авария" ? "text-red-500" :
-            status === "Недоступна" ? "text-orange-500" :
-              status === "Низкое напряжение" ? "text-yellow-500" :
-                "text-green-500"
-          }`}>
+        <div
+          className={`text-center ${
+            status === "Авария"
+              ? "text-red-500"
+              : status === "Недоступна"
+                ? "text-orange-500"
+                : status === "Низкое напряжение"
+                  ? "text-yellow-500"
+                  : "text-green-500"
+          }`}
+        >
           {status}
         </div>
         <div>{station.priority}</div>
         <div>{station.workEx}</div>
         <div>{station.baseLocation}</div>
-        <div style={{ color: station.visit === "true" ? 'green' : 'red' }}>
+        <div style={{ color: station.visit === "true" ? "green" : "red" }}>
           {station.visit}
         </div>
         <div>{station.comment}</div>
@@ -505,17 +614,42 @@ const BsVoltage = () => {
   const renderBaseStationTable = () => (
     <div className="mb-8 text-center">
       <div className="grid grid-cols-8 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
-        <SortableHeader label="БС" sortKey="name" sortConfig={sortConfig} onSort={requestSort} />
-        <SortableHeader label="Аварии" sortKey="alarms" sortConfig={sortConfig} onSort={requestSort} />
-        <SortableHeader label="Длительность" sortKey="duration" sortConfig={sortConfig} onSort={requestSort} />
-        <SortableHeader label="Напряжение" sortKey="voltage" sortConfig={sortConfig} onSort={requestSort} />
+        <SortableHeader
+          label="БС"
+          sortKey="name"
+          sortConfig={sortConfig}
+          onSort={requestSort}
+        />
+        <SortableHeader
+          label="Аварии"
+          sortKey="alarms"
+          sortConfig={sortConfig}
+          onSort={requestSort}
+        />
+        <SortableHeader
+          label="Длительность"
+          sortKey="duration"
+          sortConfig={sortConfig}
+          onSort={requestSort}
+        />
+        <SortableHeader
+          label="Напряжение"
+          sortKey="voltage"
+          sortConfig={sortConfig}
+          onSort={requestSort}
+        />
         <SortableHeader
           label="Примерное время работы АКБ"
           sortKey="estimatedTime"
           sortConfig={sortConfig}
           onSort={requestSort}
         />
-        <SortableHeader label="Статус" sortKey="status" sortConfig={sortConfig} onSort={requestSort} />
+        <SortableHeader
+          label="Статус"
+          sortKey="status"
+          sortConfig={sortConfig}
+          onSort={requestSort}
+        />
         <SortableHeader
           label="Последнее обновление"
           sortKey="lastUpdated"
@@ -540,7 +674,7 @@ const BsVoltage = () => {
   );
 
   const renderBaseStationRow = (bs: BaseStation) => {
-    const powerAlarmTimestamp = bs.alarms?.POWER; 
+    const powerAlarmTimestamp = bs.alarms?.POWER;
     const hasPowerAlarm = !!powerAlarmTimestamp;
 
     return (
@@ -551,29 +685,37 @@ const BsVoltage = () => {
         <div>{bs.name}</div>
         <div>
           {ALLOWED_ALARMS.map((alarm) => {
-          const timestamp = bs.alarms?.[alarm];
-          if (timestamp) {
-            return (
-              <div key={alarm} className="text-sm text-left text-red-500">
-                {alarm}: {formatTimestamp(timestamp)}
-              </div>
-            );
-          }
-          return null;
-        })}
-      </div>
-      <div>
-        {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
-      </div>
-        <div className={`text-center ${typeof bs.voltage === 'number'
-            ? bs.voltage < 50 ? "text-red-500" : "text-green-500"
-            : "text-red-500"
-          }`}>
-          {typeof bs.voltage === 'number' ? `${bs.voltage} V` : bs.voltage}
+            const timestamp = bs.alarms?.[alarm];
+            if (timestamp) {
+              return (
+                <div key={alarm} className="text-sm text-left text-red-500">
+                  {alarm}: {formatTimestamp(timestamp)}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+        <div>
+          {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
+        </div>
+        <div
+          className={`text-center ${
+            typeof bs.voltage === "number"
+              ? bs.voltage < 50
+                ? "text-red-500"
+                : "text-green-500"
+              : "text-red-500"
+          }`}
+        >
+          {typeof bs.voltage === "number" ? `${bs.voltage} V` : bs.voltage}
         </div>
         <div>{bs.estimatedTime}</div>
-        <div className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"
-          }`}>
+        <div
+          className={`text-center ${
+            bs.status === "Accident" ? "text-red-500" : "text-green-500"
+          }`}
+        >
           {bs.status}
         </div>
         <div>{bs.lastUpdated}</div>
@@ -582,7 +724,11 @@ const BsVoltage = () => {
             onClick={() => handleDeleteBs(bs.name)}
             className="text-red-500 hover:text-red-700"
           >
-            <TrashIcon viewBox="0 0 20 20" fill="currentColor" className="cursor-pointer">
+            <TrashIcon
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="cursor-pointer"
+            >
               <path
                 fillRule="evenodd"
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -599,7 +745,7 @@ const BsVoltage = () => {
     label,
     sortKey,
     sortConfig,
-    onSort
+    onSort,
   }: {
     label: string;
     sortKey: string;
@@ -612,7 +758,7 @@ const BsVoltage = () => {
     >
       <span>{label}</span>
       {sortConfig?.key === sortKey && (
-        <span>{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+        <span>{sortConfig.direction === "ascending" ? "↑" : "↓"}</span>
       )}
     </div>
   );
@@ -680,7 +826,9 @@ const BsVoltage = () => {
         </form>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
-          <h2 className="mb-2 text-xl font-semibold text-center">Мониторинг базовых станций</h2>
+          <h2 className="mb-2 text-xl font-semibold text-center">
+            Мониторинг базовых станций
+          </h2>
 
           <div className="flex space-x-2">
             {isLoading ? (

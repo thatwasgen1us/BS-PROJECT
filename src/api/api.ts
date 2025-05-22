@@ -73,18 +73,18 @@ export const Api = createApi({
       }),
     }),
     getBaseVoltage: builder.query({
-      query: (base) => `voltage/${base}`
+      query: (base) => `voltage/${base}`,
     }),
     getLastDataFromExternalApi: builder.query<ExternalApiResponse, void>({
       query: () => ({
         url: "https://10.77.28.213:5000/api/last_data",
-        baseUrl: ""
+        baseUrl: "",
       }),
     }),
-     getBseVoltageInfo: builder.query<StationDataVoltage| null, string>({
+    getBseVoltageInfo: builder.query<StationDataVoltage | null, string>({
       query: (base) => ({
         url: `https://10.77.28.213:430/graf_voltage/${base}`,
-        baseUrl: ""
+        baseUrl: "",
       }),
     }),
   }),
@@ -96,6 +96,5 @@ export const {
   useAddCommentMutation,
   useLazyGetBaseVoltageQuery,
   useGetLastDataFromExternalApiQuery,
-  useGetBseVoltageInfoQuery
-
+  useGetBseVoltageInfoQuery,
 } = Api;
