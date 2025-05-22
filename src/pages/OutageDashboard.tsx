@@ -75,6 +75,7 @@ const calculateDurationValue = (lastUpdate: string) => {
 
 
 const OutageDashboard = () => {
+  const [showColorLegend, setShowColorLegend] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString());
   const { data: rawStations, isLoading } = useGetLastDataFromExternalApiQuery(undefined, {
     pollingInterval: 30000,
@@ -91,7 +92,6 @@ const OutageDashboard = () => {
     const sortableStations = [...stationsWithCoords];
     if (sortConfig !== null) {
       sortableStations.sort((a, b) => {
-        // Сортировка по напряжению
         if (sortConfig.key === 'voltage') {
           const aVoltage = a.voltage !== null ? a.voltage : -Infinity;
           const bVoltage = b.voltage !== null ? b.voltage : -Infinity;
@@ -100,7 +100,6 @@ const OutageDashboard = () => {
             : bVoltage - aVoltage;
         }
         
-        // Сортировка по приоритету (как числам)
         if (sortConfig.key === 'priority') {
           const aPriority = Number(a.priority);
           const bPriority = Number(b.priority);
@@ -109,7 +108,6 @@ const OutageDashboard = () => {
             : bPriority - aPriority;
         }
         
-        // Сортировка по длительности аварии
         if (sortConfig.key === 'duration') {
           const aDuration = calculateDurationValue(a.last_update);
           const bDuration = calculateDurationValue(b.last_update);
@@ -184,10 +182,90 @@ const OutageDashboard = () => {
           >
             Показать все станции
           </button>
+
+
+<div style={{ position: 'relative', display: 'inline-block', marginRight: '20px' }}>
+  <button 
+    onMouseEnter={() => setShowColorLegend(true)}
+    onMouseLeave={() => setShowColorLegend(false)}
+    style={{
+      padding: '5px 10px',
+      backgroundColor: '#f0f0f0',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Обозначения цветов
+  </button>
+  {showColorLegend && (
+    <div style={{
+      position: 'absolute',
+      backgroundColor: '#f9f9f9',
+      minWidth: '200px',
+      boxShadow: '0px 8px 16px 0px rgba(0,0,0,0.2)',
+      padding: '12px',
+      zIndex: 10000,
+      borderRadius: '4px',
+      left: 0,
+      top: '100%',
+    }}>
+      <div style={{ marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            backgroundColor: 'green',
+            borderRadius: '50%',
+            marginRight: '8px',
+            border: '1px solid #fff'
+          }}></div>
+          <span>Норма (больше 52V)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            backgroundColor: 'orange',
+            borderRadius: '50%',
+            marginRight: '8px',
+            border: '1px solid #fff'
+          }}></div>
+          <span>Пониженное (47-52V)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            backgroundColor: 'red',
+            borderRadius: '50%',
+            marginRight: '8px',
+            border: '1px solid #fff'
+          }}></div>
+          <span>Авария (меньше 47V)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            backgroundColor: 'gray',
+            borderRadius: '50%',
+            marginRight: '8px',
+            border: '1px solid #fff'
+          }}></div>
+          <span>Нет данных</span>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
         <div>
-          <div style={{ fontSize: '0.9rem' }} className='text-text'>
-            Последнее обновление: {lastUpdated}
-          </div>
+              
+          
+        <div style={{ fontSize: '0.9rem' }} className='text-text'>
+          Последнее обновление: {lastUpdated}
+        </div>
         </div>
         <div style={{ fontSize: '0.9rem' }} className='text-text'>
           Всего аварий POWER: {stations.length}
@@ -239,7 +317,7 @@ const OutageDashboard = () => {
             </button>
           </div>
             
-          <div className='overflow-y-scroll max-h-[77vh]'>
+          <div className='overflow-y-auto max-h-[77vh]'>
               {sortedStations.map(station => (
                 <div
                   key={station.id}

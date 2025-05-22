@@ -44,7 +44,6 @@ export interface StationDataVoltage {
   station_info: StationInfo;
 }
 
-// Интервалы времени для агрегации данных по свечам
 const TIME_FRAMES = [
   { label: '5M', minutes: 5 },
   { label: '15M', minutes: 15 },
@@ -65,11 +64,11 @@ const BsSchedule: React.FC = () => {
   const [markerText, setMarkerText] = useState<string>('');
   const [markerColor, setMarkerColor] = useState<string>('#FF5733');
   const [chartType, setChartType] = useState<'line' | 'candle'>('line');
-  const [timeFrame, setTimeFrame] = useState<number>(60); // По умолчанию 1 час
+  const [timeFrame, setTimeFrame] = useState<number>(60); 
   const [showMA, setShowMA] = useState<boolean>(false);
   const [maPeriod, setMaPeriod] = useState<number>(20);
   const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [timeRange, setTimeRange] = useState<number>(7); // Дней для отображения
+  const [timeRange, setTimeRange] = useState<number>(7); 
   const { data, refetch, isFetching, isError } = useGetBseVoltageInfoQuery(bsNumber);
   const plotRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +131,6 @@ const BsSchedule: React.FC = () => {
     return result;
   };
 
-  // Функция для создания свечей на основе данных напряжения
   const createCandleData = (voltageData: { x: Date; y: number }[], minutesInterval: number): CandleData[] => {
     if (!voltageData.length) return [];
 
@@ -140,7 +138,6 @@ const BsSchedule: React.FC = () => {
     let currentCandleStart = new Date(voltageData[0].x);
     let currentValues: number[] = [];
 
-    // Устанавливаем начало интервала на границу временного окна
     currentCandleStart.setMinutes(Math.floor(currentCandleStart.getMinutes() / minutesInterval) * minutesInterval);
     currentCandleStart.setSeconds(0);
     currentCandleStart.setMilliseconds(0);
@@ -151,7 +148,6 @@ const BsSchedule: React.FC = () => {
       candleEndTime.setMinutes(candleEndTime.getMinutes() + minutesInterval);
 
       if (itemTime >= candleEndTime) {
-        // Если накопились значения, создаем свечу
         if (currentValues.length > 0) {
           candles.push({
             time: new Date(currentCandleStart),
@@ -162,8 +158,6 @@ const BsSchedule: React.FC = () => {
           });
         }
 
-        // Переходим к новому временному интервалу
-        // Возможно, нужно пропустить несколько интервалов
         while (itemTime >= candleEndTime) {
           currentCandleStart = new Date(candleEndTime);
           candleEndTime.setMinutes(candleEndTime.getMinutes() + minutesInterval);
@@ -174,7 +168,6 @@ const BsSchedule: React.FC = () => {
       }
     });
 
-    // Завершаем последнюю свечу, если есть данные
     if (currentValues.length > 0) {
       candles.push({
         time: new Date(currentCandleStart),
@@ -188,13 +181,12 @@ const BsSchedule: React.FC = () => {
     return candles;
   };
 
-  // Функция для расчета скользящей средней
   const calculateMovingAverage = (data: { x: Date; y: number }[], period: number): { x: Date; y: number }[] => {
     const result: { x: Date; y: number }[] = [];
     
     for (let i = 0; i < data.length; i++) {
       if (i < period - 1) {
-        continue; // Не хватает данных для расчета
+        continue;
       }
       
       let sum = 0;
@@ -264,11 +256,9 @@ const BsSchedule: React.FC = () => {
       customdata: [index]
     }));
 
-    // Основные данные графика
     let mainChartData: any = [];
     
     if (chartType === 'line') {
-      // Линейный график
       mainChartData = [
         {
           x: voltageData.map((item: {x: Date}) => item.x),
@@ -300,7 +290,6 @@ const BsSchedule: React.FC = () => {
         }
       ];
     } else {
-      // Свечной график
       const candleData = createCandleData(voltageData, timeFrame);
       
       mainChartData = [
@@ -328,7 +317,6 @@ const BsSchedule: React.FC = () => {
       ];
     }
 
-    // Добавление скользящей средней если нужно
     if (showMA && voltageData.length > maPeriod) {
       const maData = calculateMovingAverage(voltageData, maPeriod);
       
@@ -379,7 +367,6 @@ const BsSchedule: React.FC = () => {
       ...markersData
     ];
 
-    // Кнопки интервалов времени для графика
     const rangeButtons = [
       { count: 6, label: '6ч', step: 'hour', stepmode: 'backward' },
       { count: 12, label: '12ч', step: 'hour', stepmode: 'backward' },
@@ -433,7 +420,6 @@ const BsSchedule: React.FC = () => {
       plot_bgcolor: darkMode ? '#1F2937' : undefined,
       paper_bgcolor: darkMode ? '#111827' : undefined,
       shapes: [
-        // Отмечаем базовые уровни рекомендуемого напряжения
         {
           type: 'line',
           xref: 'paper',
@@ -848,9 +834,9 @@ const BsSchedule: React.FC = () => {
               </thead>
               <tbody className={`divide-y ${darkMode ? 'divide-gray-700 bg-gray-900' : 'divide-gray-200 bg-white'}`}>
                 {data.alarms_history
-                  .filter(alarm => alarm.type) // Фильтруем только аварии с указанным типом
-                  .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()) // Сортировка по времени (сначала новые)
-                  .slice(0, 10) // Ограничиваем 10 последними записями
+                  .filter(alarm => alarm.type) 
+                  .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()) 
+                  .slice(0, 10) 
                   .map((alarm, idx) => (
                     <tr key={idx} className={idx % 2 === 0 ? (darkMode ? 'bg-gray-800' : 'bg-gray-50') : ''}>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>

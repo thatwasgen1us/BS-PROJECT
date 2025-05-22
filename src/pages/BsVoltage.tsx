@@ -6,7 +6,6 @@ import {
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-// Типы и интерфейсы
 interface BaseStation {
   name: string;
   power: string;
@@ -30,11 +29,9 @@ interface ExternalApiStation {
   comment?: string;
 }
 
-// Константы
 const ALLOWED_ALARMS = ["POWER", "RECTIFIER", "DOOR", "TEMP_HIGH_", "TEMP_LOW", "SECOFF", "FIRE"];
 const EXTERNAL_API_REFRESH_INTERVAL = 3 * 60 * 1000;
 
-// Стилизованные компоненты
 const TrashIcon = styled.svg`
   width: 1.25rem;
   height: 1.25rem;
@@ -44,7 +41,6 @@ const TrashIcon = styled.svg`
   }
 `;
 
-// Вспомогательные функции
 const formatTimestamp = (timestamp: string): string => {
   if (!timestamp || timestamp === "БС недоступна") return "No data";
 
@@ -100,7 +96,6 @@ const calculateDuration = (timestamp: string): string => {
   }
 };
 
-// Компоненты
 const LoadingSpinner = () => (
   <svg aria-hidden="true" role="status" className="inline w-4 h-4 text-white me-3 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB" />
@@ -109,7 +104,6 @@ const LoadingSpinner = () => (
 );
 
 const BsVoltage = () => {
-  // Состояния
   const [lastExternalUpdate, setLastExternalUpdate] = useState<string>('');
   const [newBsName, setNewBsName] = useState<string>("NS");
   const [bssList, setBssList] = useState<BaseStation[]>(() => {
@@ -129,12 +123,10 @@ const BsVoltage = () => {
     direction: 'ascending' | 'descending';
   } | null>(null);
 
-  // API запросы
   const { data: baseData } = useGetBaseDataQuery();
   const [trigger] = useLazyGetBaseVoltageQuery();
   const { data: externalData, isLoading: isExternalLoading, refetch: refetchExternalData } = useGetLastDataFromExternalApiQuery();
 
-  // Эффекты
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
   }, [bssList]);
@@ -162,7 +154,7 @@ const BsVoltage = () => {
     };
   }, [refreshEnabled, refreshInterval]);
 
-  // Обработчики
+  
   const handleAddBs = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newBsName.trim() === "") return;
@@ -223,7 +215,6 @@ const BsVoltage = () => {
     setRefreshEnabled(value > 0);
   };
 
-  // Функции для работы с данными
   const refreshData = async () => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -264,7 +255,6 @@ const BsVoltage = () => {
     }
   };
 
-  // Функции сортировки
   const requestSort = (key: string) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig?.key === key && sortConfig.direction === 'ascending') {
@@ -281,7 +271,6 @@ const BsVoltage = () => {
     setExternalSortConfig({ key, direction });
   };
 
-  // Мемоизированные данные
   const sortedBssList = useMemo(() => {
     let sortableItems = [...bssList];
     if (sortConfig !== null) {
@@ -443,15 +432,13 @@ const BsVoltage = () => {
   const renderExternalStationRow = (station: ExternalApiStation) => {
     const isErrorState = station.voltage === "Ошибка" || station.voltage === "БС недоступна";
   
-  // Обрабатываем случай, когда alarms - это строка "БС недоступна"
   const alarms = typeof station.alarms === 'string' 
     ? {} 
     : station.alarms || {};
   
-  const powerAlarmTimestamp = alarms.POWER; // Только POWER для длительности
+  const powerAlarmTimestamp = alarms.POWER; 
   const hasPowerAlarm = !!powerAlarmTimestamp;
 
-  // Все аварии для отображения (кроме No_connection_to_unit и status)
   const activeAlarms = Object.entries(alarms)
     .filter(([key]) => !['No_connection_to_unit', 'status'].includes(key));
 
@@ -553,7 +540,7 @@ const BsVoltage = () => {
   );
 
   const renderBaseStationRow = (bs: BaseStation) => {
-    const powerAlarmTimestamp = bs.alarms?.POWER; // Только для длительности
+    const powerAlarmTimestamp = bs.alarms?.POWER; 
     const hasPowerAlarm = !!powerAlarmTimestamp;
 
     return (

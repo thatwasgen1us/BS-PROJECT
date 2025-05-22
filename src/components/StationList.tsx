@@ -23,7 +23,6 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     localStorage.setItem('hideZeroBases', hideZeroBases.toString());
   }, [hideZeroBases]);
 
-  // Фильтрация станций
   const filteredStations = useMemo(() => {
     if (!data) return [];
     return data.filter((station) => {
@@ -35,7 +34,6 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     });
   }, [data, searchTerm, hideZeroBases]);
 
-  // Сортировка станций
   const sortedStations = useMemo(() => {
     return [...filteredStations].sort((a, b) => {
       let comparison = 0;
@@ -56,7 +54,6 @@ const StationList: React.FC<Props> = ({ searchTerm }) => {
     });
   }, [filteredStations, sortCriteria, sortOrder]);
 
-  // Обработчики для кнопок сортировки
   const handleSort = useCallback((criteria: 'name' | 'month' | 'year') => {
     setSortCriteria(criteria);
     setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));

@@ -78,7 +78,7 @@ const Schedule: React.FC<ScheduleProps> = ({ data }) => {
         if (element) {
           element.scrollIntoView({
             behavior: 'smooth',
-            block: 'center', // Прокручивает элемент к центру экрана
+            block: 'center', 
           });
         }
       }, 100);

@@ -57,7 +57,6 @@ interface ApiResponseItem {
 export type ExternalApiResponse = ApiResponseItem[];
 export const Api = createApi({
   reducerPath: "api",
-  // Основной базовый URL
   baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.213:430/" }),
   endpoints: (builder) => ({
     getBaseData: builder.query<DataResponse | undefined, void>({

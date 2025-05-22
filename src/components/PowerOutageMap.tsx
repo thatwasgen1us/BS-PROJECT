@@ -3,7 +3,6 @@ import 'leaflet/dist/leaflet.css';
 import { forwardRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
-// Фикс для иконок
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -41,9 +40,8 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
     if (Object.keys(alarms).length === 0) return <p>Нет активных аварий</p>;
 
     const parseCustomDate = (dateStr: string) => {
-      // Формат: "20250521110411.431+0700"
       const year = parseInt(dateStr.substring(0, 4));
-      const month = parseInt(dateStr.substring(4, 6)) - 1; // Месяцы 0-11
+      const month = parseInt(dateStr.substring(4, 6)) - 1; 
       const day = parseInt(dateStr.substring(6, 8));
       const hours = parseInt(dateStr.substring(8, 10));
       const minutes = parseInt(dateStr.substring(10, 12));

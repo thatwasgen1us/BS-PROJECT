@@ -86,3 +86,11 @@ header {
 .leaflet-control-attribution {
   display: none !important;
 }
+
+.color-legend-dropdown {
+  display: none;
+}
+
+div[style*="display: inline-block"]:hover .color-legend-dropdown {
+  display: block;
+}
