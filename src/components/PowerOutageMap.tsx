@@ -2,6 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { forwardRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { addHours } from '../pages/OutageDashboard';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -123,7 +124,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(({ stations }, ref
                   <h3>{station.name}</h3>
                   <p><strong>Локация:</strong> {station.location}</p>
                   <p><strong>Напряжение:</strong> {station.voltage !== null ? `${station.voltage}V` : 'Нет данных'}</p>
-                  <p><strong>Дата аварии:</strong> {station.last_update}</p>
+                  <p><strong>Дата аварии:</strong> {addHours(station.last_update)}</p>
                   <p><strong>Приоритет:</strong> {station.priority}</p>
                   {station.work_order !== '-' && <p><strong>Наряд:</strong> {station.work_order}</p>}
                   {renderAlarmsInfo(station.alarms)}

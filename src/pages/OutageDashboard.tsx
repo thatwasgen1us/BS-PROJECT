@@ -59,7 +59,7 @@ const calculateOutageDuration = (lastUpdate: string)=> {
   return `${Math.floor(diffMinutes/60)} ч. ${diffMinutes%60} мин.`;
 };
 
-function addHours(dateString, hours = 4) {
+export function addHours(dateString, hours = 4) {
   const date = new Date(dateString.replace(' ', 'T'));
   date.setHours(date.getHours() + hours);
   
