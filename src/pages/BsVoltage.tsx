@@ -376,7 +376,7 @@ const BsVoltage = () => {
   }, [bssList, sortConfig]);
 
   const externalStations = useMemo(() => {
-    if (!externalData) return [];
+    if (!externalData || externalData[0]?.[""]) return [];
 
     return externalData.map((stationData: any) => {
       const stationKey = Object.keys(stationData)[0];
@@ -770,7 +770,7 @@ const BsVoltage = () => {
         <div>
           <h2 className="text-xl font-semibold">Данные с внешнего API</h2>
           <div>
-            Всего аварий POWER: {externalData ? externalData.length : 0}
+            Всего аварий POWER: {externalStations ? externalStations.length : 0}
           </div>
           {lastExternalUpdate && (
             <p className="text-sm text-gray-500">

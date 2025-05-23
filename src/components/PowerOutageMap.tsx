@@ -73,7 +73,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
 
     return (
       <div style={{ height: "100%", width: "100%", position: "relative" }}>
-        {stationsWithCoords.length > 0 ? (
+        {stationsWithCoords.length >= 0 ? (
           <MapContainer
             ref={ref}
             center={[55.073855, 81.104656]}

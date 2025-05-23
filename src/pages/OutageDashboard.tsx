@@ -25,7 +25,7 @@ export interface TransformedStation {
 export const transformStationData = (
   data: ExternalApiResponse
 ): TransformedStation[] => {
-  if (!data) return [];
+  if (!data || data[0]?.[""]) return [];
 
   return data.flatMap((item) => {
     const stationKey = Object.keys(item)[0];
