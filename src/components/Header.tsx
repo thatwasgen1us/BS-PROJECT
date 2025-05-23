@@ -28,6 +28,9 @@ const Header = () => {
           <Link to={"/bs-map"} className="transition-all hover:text-blue-300">
             Карта БС
           </Link>
+          <Link to={"/bs-temperature"} className="transition-all hover:text-blue-300">
+            График температур на БС
+          </Link>
         </nav>
       </div>
     </header>

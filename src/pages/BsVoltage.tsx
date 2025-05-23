@@ -539,8 +539,10 @@ const BsVoltage = () => {
     );
 
     let status = "Норма";
-    if (station.voltage === "БС недоступна" || isErrorState) {
-      status = "Недоступна";
+    if (station.voltage === "БС недоступна") {
+      status = "БС недоступна";
+    } else if (station.voltage === "Ошибка") {
+      status = "Ошибка";
     } else if (activeAlarms.length > 0) {
       status = "Авария";
     } else if (typeof station.voltage === "number" && station.voltage < 47) {
@@ -589,7 +591,7 @@ const BsVoltage = () => {
         </div>
         <div
           className={`text-center ${
-            status === "Авария"
+            status === "Авария"|| status === "Ошибка"
               ? "text-red-500"
               : status === "Недоступна"
                 ? "text-orange-500"

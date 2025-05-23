@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/utils/ThemeContext";
 import BsSchedule from "./pages/BsSchedule";
 import OutageDashboard from "./pages/OutageDashboard";
+import BsTemperature from "./pages/BsTemperature";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/bs-voltage" element={<BsVoltage />} />
             <Route path="/bs-voltage-schedule" element={<BsSchedule />} />
             <Route path="/bs-map" element={<OutageDashboard />} />
+            <Route path="/bs-temperature" element={<BsTemperature />} />
           </Routes>
         </BrowserRouter>
       </div>

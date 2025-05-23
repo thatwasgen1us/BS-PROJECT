@@ -55,6 +55,23 @@ interface ApiResponseItem {
 }
 
 export type ExternalApiResponse = ApiResponseItem[];
+
+// Определите интерфейс для данных температуры
+export interface TemperatureItem {
+  [key: string]: number;
+}
+
+export interface StationDataTemp {
+  BBU: TemperatureItem[];
+  RRU: TemperatureItem[];
+}
+
+export interface StationTemp {
+  [baseStation: string]: StationDataTemp;
+}
+
+export type TemperatureResponse = StationTemp[][];
+
 export const Api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.213:430/" }),
@@ -87,6 +104,9 @@ export const Api = createApi({
         baseUrl: "",
       }),
     }),
+    getTemperatureData: builder.query<TemperatureResponse, void>({
+      query: () => "all_temperature",
+    }),
   }),
 });
 
@@ -97,4 +117,5 @@ export const {
   useLazyGetBaseVoltageQuery,
   useGetLastDataFromExternalApiQuery,
   useGetBseVoltageInfoQuery,
+  useGetTemperatureDataQuery,
 } = Api;
