@@ -74,7 +74,7 @@ export type TemperatureResponse = StationTemp[][];
 
 export const Api = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.213:430/" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "https://10.77.28.241:430/" }),
   endpoints: (builder) => ({
     getBaseData: builder.query<DataResponse | undefined, void>({
       query: () => "top_rate",
@@ -94,13 +94,13 @@ export const Api = createApi({
     }),
     getLastDataFromExternalApi: builder.query<ExternalApiResponse, void>({
       query: () => ({
-        url: "https://10.77.28.213:5000/api/last_data",
+        url: "https://10.77.28.241:5000/api/last_data",
         baseUrl: "",
       }),
     }),
     getBseVoltageInfo: builder.query<StationDataVoltage | null, string>({
       query: (base) => ({
-        url: `https://10.77.28.213:430/graf_voltage/${base}`,
+        url: `https://10.77.28.241:430/graf_voltage/${base}`,
         baseUrl: "",
       }),
     }),
