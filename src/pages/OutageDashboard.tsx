@@ -424,6 +424,9 @@ const OutageDashboard = () => {
                   <div style={{ fontSize: "0.8em" }}>
                     Длительность: {calculateOutageDuration(station.last_update)}
                   </div>
+                  <div style={{ fontSize: "0.8em" }}>
+                    Посещение: <span style={{color: station.visited ? 'green' : 'red' }}>{(station.visited ? 'true' : 'false')}</span>
+                  </div>
                 </div>
               ))}
             </div>
