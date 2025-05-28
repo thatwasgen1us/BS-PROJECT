@@ -100,7 +100,7 @@ export const Api = createApi({
     }),
     getBseVoltageInfo: builder.query<StationDataVoltage | null, string>({
       query: (base) => ({
-        url: `https://wsns-lavrov2.corp.tele2.ru:5000/api/last_data:430/graf_voltage/${base}`,
+        url: `https://wsns-lavrov2.corp.tele2.ru:430/graf_voltage/${base}`,
         baseUrl: "",
       }),
     }),
