@@ -239,8 +239,8 @@ const OutageDashboard = () => {
           padding: "12px",
           zIndex: 10000,
           borderRadius: "4px",
-          left: 20,
-          bottom: '0px',
+          left: 25,
+          bottom: '35px',
         }}
       >
         <div style={{ marginBottom: "8px" }}>
