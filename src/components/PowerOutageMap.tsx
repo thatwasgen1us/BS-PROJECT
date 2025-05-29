@@ -1,6 +1,6 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { addHours } from "../pages/OutageDashboard";
 
@@ -34,7 +34,25 @@ interface PowerOutageMapProps {
 
 const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
   ({ stations }, ref) => {
-    const getMarkerColor = (voltage: number | null ) => {
+    const [regionFilters, ] = useState({
+      novosibirsk: true,
+      tomsk: true,
+      other: true
+    });
+
+    const getRegion = (stationName: string) => {
+      if (stationName.startsWith('NS')) return 'novosibirsk';
+      if (stationName.startsWith('TO')) return 'tomsk';
+      return 'other';
+    };
+
+    const filteredStations = stations.filter(station => {
+      if (!station.coordinates) return false;
+      const region = getRegion(station.name);
+      return regionFilters[region];
+    });
+
+    const getMarkerColor = (voltage: number | null) => {
       if (voltage === null || typeof voltage !== 'number') return "gray";
       return voltage < 47 ? "red" : voltage < 52 ? "orange" : "green";
     };
@@ -69,11 +87,9 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
       );
     };
 
-    const stationsWithCoords = stations.filter((s) => s.coordinates);
-
     return (
       <div style={{ height: "100%", width: "100%", position: "relative" }}>
-        {stationsWithCoords.length >= 0 ? (
+        {filteredStations.length >= 0 ? (
           <MapContainer
             ref={ref}
             center={[55.073855, 81.104656]}
@@ -87,7 +103,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
               attribution='Картографические данные &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
             />
 
-            {stationsWithCoords.map((station) => (
+            {filteredStations.map((station) => (
               <Marker
                 key={station.id}
                 position={station.coordinates!}
@@ -155,7 +171,6 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
                     )}
 
                     {renderAlarmsInfo(station.alarms)}
-                    
                   </div>
                 </Popup>
               </Marker>
@@ -172,7 +187,7 @@ const PowerOutageMap = forwardRef<L.Map, PowerOutageMapProps>(
               fontWeight: "bold",
             }}
           >
-            Нет станций с координатами для отображения
+            Нет станций с выбранными фильтрами
           </div>
         )}
       </div>
