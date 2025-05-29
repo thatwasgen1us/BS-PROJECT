@@ -1,5 +1,4 @@
 import {
-  useGetBaseDataQuery,
   useGetLastDataFromExternalApiQuery,
   useLazyGetBaseVoltageQuery,
 } from "@/api/api";
@@ -161,14 +160,22 @@ const BsVoltage = () => {
     key: string;
     direction: "ascending" | "descending";
   } | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
 
-  const { data: baseData } = useGetBaseDataQuery();
   const [trigger] = useLazyGetBaseVoltageQuery();
   const {
     data: externalData,
     isLoading: isExternalLoading,
     refetch: refetchExternalData,
   } = useGetLastDataFromExternalApiQuery();
+
+  const getRegion = (stationName: string) => {
+    if (stationName.startsWith('NS')) return 'novosibirsk';
+    if (stationName.startsWith('TO')) return 'tomsk';
+    if (stationName.startsWith('OM')) return 'omsk';
+    if (stationName.startsWith('KE')) return 'kemerovo';
+    return 'other';
+  };
 
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
@@ -201,7 +208,7 @@ const BsVoltage = () => {
     e.preventDefault();
     if (newBsName.trim() === "") return;
 
-    const isValidBsName = /^NS\d{4}$/.test(newBsName);
+    const isValidBsName = /^NS||TO||KE||OM\d{4}$/.test(newBsName);
     if (!isValidBsName) {
       setErrorMessage(
         "Имя БС должно состоять из 6 символов: 'NS' и 4 цифры (например, NS1234)."
@@ -212,12 +219,6 @@ const BsVoltage = () => {
     const existsInBssList = bssList.some((bs) => bs.name === newBsName);
     if (existsInBssList) {
       setErrorMessage("БС с таким номером уже существует!");
-      return;
-    }
-
-    const baseInData = baseData?.find((bs) => bs.BS_NAME === newBsName);
-    if (!baseInData) {
-      setErrorMessage("База с таким номером не найдена в данных.");
       return;
     }
 
@@ -233,7 +234,7 @@ const BsVoltage = () => {
     };
 
     setBssList((prev) => [...prev, newBs]);
-    setNewBsName("NS");
+    setNewBsName("");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -472,6 +473,18 @@ const BsVoltage = () => {
     return sortableItems;
   }, [externalStations, externalSortConfig]);
 
+  const filteredBssList = useMemo(() => {
+    if (selectedRegion === "all") return sortedBssList;
+    return sortedBssList.filter((bs) => getRegion(bs.name) === selectedRegion);
+  }, [sortedBssList, selectedRegion]);
+
+  const filteredExternalStations = useMemo(() => {
+    if (selectedRegion === "all") return sortedExternalStations;
+    return sortedExternalStations.filter(
+      (station) => getRegion(station.name) === selectedRegion
+    );
+  }, [sortedExternalStations, selectedRegion]);
+
   const renderExternalApiTable = () => (
     <div className="mb-4 text-center">
       <div className="grid grid-cols-10 gap-4 p-3 font-semibold rounded-t-lg bg-background text-text">
@@ -513,8 +526,8 @@ const BsVoltage = () => {
             <LoadingSpinner />
             Загрузка данных...
           </div>
-        ) : sortedExternalStations.length > 0 ? (
-          sortedExternalStations.map(renderExternalStationRow)
+        ) : filteredExternalStations.length > 0 ? (
+          filteredExternalStations.map(renderExternalStationRow)
         ) : (
           <div className="p-4 text-center text-gray-500">
             Нет данных для отображения
@@ -559,19 +572,19 @@ const BsVoltage = () => {
             isErrorState
               ? "text-red-500"
               : typeof station.voltage === "number"
-                ? station.voltage < 47
-                  ? "text-red-500"
-                  : station.voltage < 50
-                    ? "text-yellow-500"
-                    : "text-green-500"
-                : "text-red-500"
+              ? station.voltage < 47
+                ? "text-red-500"
+                : station.voltage < 50
+                ? "text-yellow-500"
+                : "text-green-500"
+              : "text-red-500"
           }`}
         >
           {isErrorState
             ? "Ошибка"
             : typeof station.voltage === "number"
-              ? `${station.voltage} V`
-              : station.voltage}
+            ? `${station.voltage} V`
+            : station.voltage}
         </div>
         <div className="text-left break-words">
           {isErrorState ? (
@@ -591,13 +604,13 @@ const BsVoltage = () => {
         </div>
         <div
           className={`text-center ${
-            status === "Авария"|| status === "Ошибка"
+            status === "Авария" || status === "Ошибка"
               ? "text-red-500"
               : status === "Недоступна"
-                ? "text-orange-500"
-                : status === "Низкое напряжение"
-                  ? "text-yellow-500"
-                  : "text-green-500"
+              ? "text-orange-500"
+              : status === "Низкое напряжение"
+              ? "text-yellow-500"
+              : "text-green-500"
           }`}
         >
           {status}
@@ -664,8 +677,8 @@ const BsVoltage = () => {
       </div>
 
       <div className="text-center bg-white divide-y divide-gray-200 rounded shadow">
-        {sortedBssList.length > 0 ? (
-          sortedBssList.map(renderBaseStationRow)
+        {filteredBssList.length > 0 ? (
+          filteredBssList.map(renderBaseStationRow)
         ) : (
           <div className="p-4 text-center text-gray-500">
             Нет данных для отображения
@@ -765,6 +778,27 @@ const BsVoltage = () => {
     </div>
   );
 
+  const RegionFilter = () => (
+    <div className="flex items-center mb-4 space-x-2">
+      <label htmlFor="regionFilter" className="text-sm text-gray-700">
+        Фильтр по региону:
+      </label>
+      <select
+        id="regionFilter"
+        value={selectedRegion}
+        onChange={(e) => setSelectedRegion(e.target.value)}
+        className="px-2 py-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 background-white"
+      >
+        <option value="all">Все регионы</option>
+        <option value="novosibirsk">Новосибирск</option>
+        <option value="tomsk">Томск</option>
+        <option value="omsk">Омск</option>
+        <option value="kemerovo">Кемерово</option>
+        <option value="other">Другие</option>
+      </select>
+    </div>
+  );
+
   return (
     <div className="max-h-screen min-h-screen p-6 pt-16 pb-10 mt-6 overflow-y-scroll rounded-lg shadow-lg bg-blue-50">
       {/* Вторая таблица - данные из внешнего API */}
@@ -772,7 +806,8 @@ const BsVoltage = () => {
         <div>
           <h2 className="text-xl font-semibold">Данные с внешнего API</h2>
           <div>
-            Всего аварий POWER: {externalStations ? externalStations.length : 0}
+            Всего аварий POWER:{" "}
+            {filteredExternalStations ? filteredExternalStations.length : 0}
           </div>
           {lastExternalUpdate && (
             <p className="text-sm text-gray-500">
@@ -796,6 +831,7 @@ const BsVoltage = () => {
         </button>
       </div>
 
+      <RegionFilter />
       {renderExternalApiTable()}
 
       <div className="text-center">
