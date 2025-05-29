@@ -114,7 +114,6 @@ const OutageDashboard = () => {
   }, [regionFilters]);
 
   const stations = rawStations ? transformStationData(rawStations) : [];
-  const stationsWithoutCoords = stations.filter((s) => !s.coordinates);
 
   const getRegion = (stationName: string) => {
     if (stationName.startsWith('NS')) return 'novosibirsk';
@@ -510,45 +509,6 @@ const OutageDashboard = () => {
           </div>
         </div>
       </div>
-
-      {stationsWithoutCoords.length > 0 && (
-        <div style={{ marginTop: "30px" }}>
-          <h2>Станции без координат</h2>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "15px",
-              marginTop: "15px",
-            }}
-          >
-            {stationsWithoutCoords.map((station) => (
-              <div
-                key={station.id}
-                style={{
-                  padding: "15px",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "5px",
-                  backgroundColor:
-                    station.voltage === 0 ? "#ffebee" : "#e8f5e9",
-                }}
-              >
-                <h3>
-                  {station.name} - {station.location}
-                </h3>
-                <p>
-                  Напряжение:{" "}
-                  {station.voltage !== null
-                    ? `${station.voltage}V`
-                    : "Нет данных"}
-                </p>
-                <p>Последнее обновление: {station.last_update}</p>
-                <p>Приоритет: {station.priority}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
