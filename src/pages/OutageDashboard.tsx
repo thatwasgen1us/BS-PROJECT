@@ -226,7 +226,7 @@ const OutageDashboard = () => {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        maxHeight: '90vh',
+        maxHeight: 'calc(100vh - 60px)',
         overflow: 'hidden'
       }}
     >
