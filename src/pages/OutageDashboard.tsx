@@ -98,13 +98,43 @@ const OutageDashboard = () => {
     key: string;
     direction: "ascending" | "descending";
   } | null>(null);
+  const [regionFilters, setRegionFilters] = useState(() => {
+    const savedFilters = localStorage.getItem("regionFilters");
+    return savedFilters ? JSON.parse(savedFilters) : {
+      novosibirsk: true,
+      tomsk: true,
+      omsk: true,
+      kemerovo: true,
+      other: true
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem("regionFilters", JSON.stringify(regionFilters));
+  }, [regionFilters]);
 
   const stations = rawStations ? transformStationData(rawStations) : [];
-  const stationsWithCoords = stations.filter((s) => s.coordinates);
   const stationsWithoutCoords = stations.filter((s) => !s.coordinates);
 
+  const getRegion = (stationName: string) => {
+    if (stationName.startsWith('NS')) return 'novosibirsk';
+    if (stationName.startsWith('TO')) return 'tomsk';
+    if (stationName.startsWith('OM')) return 'omsk';
+    if (stationName.startsWith('KE')) return 'kemerovo';
+    
+    return 'other';
+  };
+
+  const filteredStations = useMemo(() => {
+    return stations.filter(station => {
+      if (!station.coordinates) return false;
+      const region = getRegion(station.name);
+      return regionFilters[region];
+    });
+  }, [stations, regionFilters]);
+
   const sortedStations = useMemo(() => {
-    const sortableStations = [...stationsWithCoords];
+    const sortableStations = [...filteredStations];
     if (sortConfig !== null) {
       sortableStations.sort((a, b) => {
         if (sortConfig.key === "voltage") {
@@ -135,7 +165,7 @@ const OutageDashboard = () => {
       });
     }
     return sortableStations;
-  }, [stationsWithCoords, sortConfig]);
+  }, [filteredStations, sortConfig]);
 
   useEffect(() => {
     setLastUpdated(new Date().toLocaleTimeString());
@@ -162,15 +192,22 @@ const OutageDashboard = () => {
   };
 
   const showAllStations = () => {
-    if (mapRef.current && stationsWithCoords.length > 0) {
+    if (mapRef.current && filteredStations.length > 0) {
       const bounds = L.latLngBounds(
-        stationsWithCoords.map((s) => s.coordinates!)
+        filteredStations.map((s) => s.coordinates!)
       );
       mapRef.current.flyToBounds(bounds, {
         padding: [100, 100],
         duration: 1,
       });
     }
+  };
+
+  const handleFilterChange = (region: keyof typeof regionFilters) => {
+    setRegionFilters(prev => ({
+      ...prev,
+      [region]: !prev[region]
+    }));
   };
 
   if (isLoading)
@@ -222,7 +259,7 @@ const OutageDashboard = () => {
                 border: "1px solid #fff",
               }}
             ></div>
-            <span>Норма (больше 52V)</span>
+            <span>{'U > 52V'}</span>
           </div>
           <div
             style={{
@@ -241,7 +278,7 @@ const OutageDashboard = () => {
                 border: "1px solid #fff",
               }}
             ></div>
-            <span>Пониженное (47-52V)</span>
+            <span>{'47 < U < 52V'}</span>
           </div>
           <div
             style={{
@@ -260,7 +297,7 @@ const OutageDashboard = () => {
                 border: "1px solid #fff",
               }}
             ></div>
-            <span>Авария (меньше 47V)</span>
+            <span>{'U < 47 V'}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div
@@ -286,19 +323,57 @@ const OutageDashboard = () => {
         }}
       >
         <h1 className="text-text">Мониторинг базовых станций</h1>
-        <button
-          onClick={showAllStations}
-          style={{
-            marginRight: "20px",
-            padding: "5px 10px",
-            backgroundColor: "#f0f0f0",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Показать все станции
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", marginRight: "10px" }} className="text-text">
+            <label>
+              <input
+                type="checkbox"
+                checked={regionFilters.novosibirsk}
+                onChange={() => handleFilterChange('novosibirsk')}
+              /> NS
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={regionFilters.tomsk}
+                onChange={() => handleFilterChange('tomsk')}
+              /> TO
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={regionFilters.omsk}
+                onChange={() => handleFilterChange('omsk')}
+              /> OM
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={regionFilters.kemerovo}
+                onChange={() => handleFilterChange('kemerovo')}
+              /> KE
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={regionFilters.other}
+                onChange={() => handleFilterChange('other')}
+              /> Другие
+            </label>
+          </div>
+          <button
+            onClick={showAllStations}
+            style={{
+              padding: "5px 10px",
+              backgroundColor: "#f0f0f0",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Показать все станции
+          </button>
+        </div>
 
         <div>
           <div style={{ fontSize: "0.9rem" }} className="text-text">
@@ -312,7 +387,7 @@ const OutageDashboard = () => {
 
       <div style={{ display: "flex", gap: "20px", marginTop: "5px" }}>
         <div style={{ flex: 3, position: "relative", height: "87vh" }}>
-          <PowerOutageMap stations={stations} ref={mapRef} />
+          <PowerOutageMap stations={filteredStations} ref={mapRef} />
         </div>
 
         <div
@@ -328,7 +403,7 @@ const OutageDashboard = () => {
           }}
         >
           <h3 style={{ marginBottom: "15px", textAlign: "center" }}>
-            Список базовых станций
+            Список базовых станций ({filteredStations.length})
           </h3>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
