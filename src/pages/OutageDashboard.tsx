@@ -226,6 +226,7 @@ const OutageDashboard = () => {
         width: "100%",
         display: "flex",
         flexDirection: "column",
+        maxHeight: '100vh'
       }}
     >
       <div
@@ -238,7 +239,7 @@ const OutageDashboard = () => {
           zIndex: 10000,
           borderRadius: "4px",
           left: 20,
-          bottom: 2,
+          bottom: '95px',
         }}
       >
         <div style={{ marginBottom: "8px" }}>
