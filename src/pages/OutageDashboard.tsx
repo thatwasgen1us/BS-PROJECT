@@ -240,7 +240,7 @@ const OutageDashboard = () => {
           zIndex: 10000,
           borderRadius: "4px",
           left: 25,
-          bottom: '35px',
+          bottom: '25px',
         }}
       >
         <div style={{ marginBottom: "8px" }}>
