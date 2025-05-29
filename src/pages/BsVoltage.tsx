@@ -160,7 +160,10 @@ const BsVoltage = () => {
     key: string;
     direction: "ascending" | "descending";
   } | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<string>("all");
+  const [selectedRegion, setSelectedRegion] = useState<string>(() => {
+    const savedRegion = localStorage.getItem("selectedRegion");
+    return savedRegion || "all";
+  });
 
   const [trigger] = useLazyGetBaseVoltageQuery();
   const {
@@ -180,6 +183,10 @@ const BsVoltage = () => {
   useEffect(() => {
     localStorage.setItem("bssList", JSON.stringify(bssList));
   }, [bssList]);
+
+  useEffect(() => {
+    localStorage.setItem("selectedRegion", selectedRegion);
+  }, [selectedRegion]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -421,13 +428,13 @@ const BsVoltage = () => {
 
           const aTime = aDuration
             ? calculateDuration(String(aDuration))
-                .split(":")
-                .reduce((acc, time) => 60 * acc + +time, 0)
+              .split(":")
+              .reduce((acc, time) => 60 * acc + +time, 0)
             : 0;
           const bTime = bDuration
             ? calculateDuration(String(bDuration))
-                .split(":")
-                .reduce((acc, time) => 60 * acc + +time, 0)
+              .split(":")
+              .reduce((acc, time) => 60 * acc + +time, 0)
             : 0;
 
           if (aTime < bTime) {
@@ -568,23 +575,22 @@ const BsVoltage = () => {
       >
         <div>{station.name}</div>
         <div
-          className={`text-center ${
-            isErrorState
+          className={`text-center ${isErrorState
               ? "text-red-500"
               : typeof station.voltage === "number"
-              ? station.voltage < 47
-                ? "text-red-500"
-                : station.voltage < 50
-                ? "text-yellow-500"
-                : "text-green-500"
-              : "text-red-500"
-          }`}
+                ? station.voltage < 47
+                  ? "text-red-500"
+                  : station.voltage < 50
+                    ? "text-yellow-500"
+                    : "text-green-500"
+                : "text-red-500"
+            }`}
         >
           {isErrorState
             ? "Ошибка"
             : typeof station.voltage === "number"
-            ? `${station.voltage} V`
-            : station.voltage}
+              ? `${station.voltage} V`
+              : station.voltage}
         </div>
         <div className="text-left break-words">
           {isErrorState ? (
@@ -603,15 +609,14 @@ const BsVoltage = () => {
           {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
         </div>
         <div
-          className={`text-center ${
-            status === "Авария" || status === "Ошибка"
+          className={`text-center ${status === "Авария" || status === "Ошибка"
               ? "text-red-500"
               : status === "Недоступна"
-              ? "text-orange-500"
-              : status === "Низкое напряжение"
-              ? "text-yellow-500"
-              : "text-green-500"
-          }`}
+                ? "text-orange-500"
+                : status === "Низкое напряжение"
+                  ? "text-yellow-500"
+                  : "text-green-500"
+            }`}
         >
           {status}
         </div>
@@ -715,21 +720,19 @@ const BsVoltage = () => {
           {hasPowerAlarm ? calculateDuration(powerAlarmTimestamp) : "-"}
         </div>
         <div
-          className={`text-center ${
-            typeof bs.voltage === "number"
+          className={`text-center ${typeof bs.voltage === "number"
               ? bs.voltage < 50
                 ? "text-red-500"
                 : "text-green-500"
               : "text-red-500"
-          }`}
+            }`}
         >
           {typeof bs.voltage === "number" ? `${bs.voltage} V` : bs.voltage}
         </div>
         <div>{bs.estimatedTime}</div>
         <div
-          className={`text-center ${
-            bs.status === "Accident" ? "text-red-500" : "text-green-500"
-          }`}
+          className={`text-center ${bs.status === "Accident" ? "text-red-500" : "text-green-500"
+            }`}
         >
           {bs.status}
         </div>
